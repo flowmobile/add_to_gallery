@@ -1,3 +1,19 @@
+# TODO
+
+This package does too much:
+
+Remove Thumbnail shit
+Remove Rotation shit
+Remove Permissions shit
+  just throw instead
+  advise the use of permission_handler
+Documentation
+  Needs a lot of work
+  Important NOTE
+    Google Photos will automatically remove exact duplicate images
+    Which can cause confusion
+    
+
 # Gallery Saver for Flutter
 
 Saves images and videos from network or temporary file to external storage. 

@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.TextUtils
@@ -33,13 +34,13 @@ internal object FileUtils {
      * @param contentResolver - content resolver
      * @param path            - path to temp file that needs to be stored
      * @param folderName      - folder name for storing image
-     * @return true if image was saved successfully
+     * @return path to newly created file
      */
     fun insertImage(
         contentResolver: ContentResolver,
         path: String,
         folderName: String?
-    ): Boolean {
+    ): String? {
 
         val file = File(path)
         val extension = MimeTypeMap.getFileExtensionFromUrl(file.toString())
@@ -63,6 +64,7 @@ internal object FileUtils {
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
 
         var imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
         try {
             imageUri = contentResolver.insert(imageUri, values)
 
@@ -83,6 +85,11 @@ internal object FileUtils {
                     )
                     storeThumbnail(contentResolver, miniThumb, pathId)
                 }
+
+                if (imageUri != null) {
+                    return getFilePathFromContentUri(imageUri, contentResolver)
+                }
+                
             } else {
                 if (imageUri != null) {
                     contentResolver.delete(imageUri, null, null)
@@ -91,12 +98,11 @@ internal object FileUtils {
             }
         } catch (e: IOException) {
             contentResolver.delete(imageUri!!, null, null)
-            return false
+            return null
         } catch (t: Throwable) {
-            return false
+            return null
         }
-
-        return true
+        return null
     }
 
     /**
@@ -180,6 +186,27 @@ internal object FileUtils {
     }
 
     /**
+     * @param uri             - provided file uri
+     * @param contentResolver - content resolver
+     * @return path from provided Uri
+     */
+    private fun getFilePathFromContentUri(uri: Uri,
+                                          contentResolver: ContentResolver): String? {
+        var filePath: String? = null
+
+        val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DATA), null, null, null)
+
+        var columnIndex: Int
+
+        cursor?.use {
+            cursor.moveToFirst()
+            columnIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATA)
+            filePath = cursor.getString(columnIndex)
+        }
+        return filePath
+    }
+
+    /**
      * @param orientation - exif orientation
      * @return how many degrees is file rotated
      */
@@ -230,14 +257,14 @@ internal object FileUtils {
      * @param contentResolver - content resolver
      * @param path            - path to temp file that needs to be stored
      * @param folderName      - folder name for storing video
-     * @return true if video was saved successfully
+     * @return path to newly created file
      */
     fun insertVideo(
         contentResolver: ContentResolver,
         inputPath: String,
         folderName: String?,
         bufferSize: Int = BUFFER_SIZE
-    ): Boolean {
+    ): String? {
 
         val inputFile = File(inputPath)
         val inputStream: InputStream?
@@ -258,7 +285,6 @@ internal object FileUtils {
         values.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis())
         values.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis())
 
-
         try {
             val url = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
             inputStream = FileInputStream(inputFile)
@@ -274,15 +300,18 @@ internal object FileUtils {
                         }
                     }
                 }
+                if (url != null) {
+                    return getFilePathFromContentUri(url, contentResolver)
+                }
             }
         } catch (fnfE: FileNotFoundException) {
             Log.e("GallerySaver", fnfE.message)
-            return false
+            return null
         } catch (e: Exception) {
             Log.e("GallerySaver", e.message)
-            return false
+            return null
         }
-        return true
+        return null
     }
 
     private fun getAlbumFolderPath(folderName: String?, mediaType: MediaType): String {

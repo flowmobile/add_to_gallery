@@ -49,7 +49,6 @@ class GallerySaver internal constructor(private val activity: Activity) :
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION
             )
-
         }
     }
 
@@ -62,20 +61,23 @@ class GallerySaver internal constructor(private val activity: Activity) :
 
     private fun saveMediaFile() {
         uiScope.launch {
-            val success = async(Dispatchers.IO) {
+            val path = async(Dispatchers.IO) {
                 if (mediaType == MediaType.video) {
                     FileUtils.insertVideo(activity.contentResolver, filePath, albumName)
                 } else {
                     FileUtils.insertImage(activity.contentResolver, filePath, albumName)
                 }
             }
-            success.await()
-            finishWithSuccess()
+            finishWithSuccess(path.await())
         }
     }
 
-    private fun finishWithSuccess() {
-        pendingResult!!.success(true)
+    private fun finishWithSuccess(path: String?) {
+        if(path != null){
+            pendingResult!!.success(path)
+        } else {
+            pendingResult!!.error("error", "Could not save image to gallery", null)
+        }
         pendingResult = null
     }
 

@@ -47,40 +47,40 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
                 if status == .authorized{
                     self._saveMediaToAlbum(path, mediaType, albumName, result)
                 } else {
-                    result(false);
+                    result(FlutterError(code: "permission_not_determined", message: "Permission Not Determined", details: nil))
                 }
             })
         } else if status == .authorized {
             self._saveMediaToAlbum(path, mediaType, albumName, result)
         } else {
-            result(false);
+            result(FlutterError(code: "permission_not_authorized", message: "Permission Not Authorized", details: nil))
         }
     }
     
     private func _saveMediaToAlbum(_ imagePath: String, _ mediaType: MediaType, _ albumName: String?,
-                                   _ flutterResult: @escaping FlutterResult) {
+                                   _ result: @escaping FlutterResult) {
         if(albumName == nil){
-           self.saveFile(imagePath, mediaType, nil, flutterResult)
+            self.saveFile(imagePath, mediaType, nil, result)
         } else if let album = fetchAssetCollectionForAlbum(albumName!) {
-             self.saveFile(imagePath, mediaType, album, flutterResult)
+            self.saveFile(imagePath, mediaType, album, result)
         } else {
             // create photos album
             createAppPhotosAlbum(albumName: albumName!) { (error) in
                 guard error == nil else {
-                    flutterResult(false)
+                    result(FlutterError(code: "album_not_available", message: "Album Not Available", details: nil))
                     return
-                    }
+                }
                 if let album = self.fetchAssetCollectionForAlbum(albumName!){
-                    self.saveFile(imagePath, mediaType, album, flutterResult)
+                    self.saveFile(imagePath, mediaType, album, result)
                 } else {
-                    flutterResult(false)
+                    result(FlutterError(code: "could_not_create_album", message: "Could Not Create Album", details: nil))
                 }
             }
         }
     }
     
     private func saveFile(_ filePath: String, _ mediaType: MediaType, _ album: PHAssetCollection?,
-                          _ flutterResult: @escaping FlutterResult) {
+                          _ result: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
         PHPhotoLibrary.shared().performChanges({
             let assetCreationRequest = mediaType == .image ?
@@ -89,19 +89,19 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
             if (album != nil) {
                 guard let assetCollectionChangeRequest = PHAssetCollectionChangeRequest(for: album!),
                     let createdAssetPlaceholder = assetCreationRequest?.placeholderForCreatedAsset else {
-                            return
+                        return
                     }
                 assetCollectionChangeRequest.addAssets(NSArray(array: [createdAssetPlaceholder]))
             }
         }) { (success, error) in
             if success {
-                flutterResult(true)
+                result(filePath) // Success!
             } else {
-                flutterResult(false)
+                result(FlutterError(code: "could_not_save_file", message: "Could Not Save File", details: nil))
             }
         }
     }
-   
+
     private func fetchAssetCollectionForAlbum(_ albumName: String) -> PHAssetCollection? {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)

@@ -10,15 +10,15 @@ void main() {
 
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => widget is Text &&
-                           widget.data.startsWith('Take photo'),
+        (Widget widget) =>
+            widget is Text && widget.data!.startsWith('Take photo'),
       ),
       findsOneWidget,
     );
     expect(
       find.byWidgetPredicate(
-            (Widget widget) => widget is Text &&
-            widget.data.startsWith('Record video'),
+        (Widget widget) =>
+            widget is Text && widget.data!.startsWith('Record video'),
       ),
       findsOneWidget,
     );

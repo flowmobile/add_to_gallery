@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 
+/// Save images and videos to the gallery
 class GallerySaver {
   static const String channelName = 'gallery_saver';
   static const String methodSaveImage = 'saveImage';
@@ -18,7 +19,7 @@ class GallerySaver {
   static const MethodChannel _channel = const MethodChannel(channelName);
 
   ///saves video from provided temp path and optional album name in gallery
-  static Future<bool?> saveVideo(String path, {String? albumName}) async {
+  static Future<String> saveVideo(String path, {String? albumName}) async {
     File? tempFile;
     if (path.isEmpty) {
       throw ArgumentError(pleaseProvidePath);
@@ -30,18 +31,18 @@ class GallerySaver {
       tempFile = await _downloadFile(path);
       path = tempFile.path;
     }
-    bool? result = await _channel.invokeMethod(
-      methodSaveVideo,
+    var filePath = await _channel.invokeMethod(
+      methodSaveImage,
       <String, dynamic>{'path': path, 'albumName': albumName},
     );
     if (tempFile != null) {
       tempFile.delete();
     }
-    return result;
+    return filePath.toString();
   }
 
   ///saves image from provided temp path and optional album name in gallery
-  static Future<bool?> saveImage(String path, {String? albumName}) async {
+  static Future<String> saveImage(String path, {String? albumName}) async {
     File? tempFile;
     if (path.isEmpty) {
       throw ArgumentError(pleaseProvidePath);
@@ -53,16 +54,14 @@ class GallerySaver {
       tempFile = await _downloadFile(path);
       path = tempFile.path;
     }
-
-    bool? result = await _channel.invokeMethod(
+    var filePath = await _channel.invokeMethod(
       methodSaveImage,
       <String, dynamic>{'path': path, 'albumName': albumName},
     );
     if (tempFile != null) {
       tempFile.delete();
     }
-
-    return result;
+    return filePath.toString();
   }
 
   static Future<File> _downloadFile(String url) async {
