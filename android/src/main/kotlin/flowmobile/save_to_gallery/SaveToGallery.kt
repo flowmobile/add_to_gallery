@@ -1,4 +1,4 @@
-package carnegietechnologies.gallery_saver
+package flowmobile.save_to_gallery
 
 import android.Manifest
 import android.app.Activity
@@ -13,7 +13,7 @@ enum class MediaType { image, video }
 /**
  * Class holding implementation of saving images and videos
  */
-class GallerySaver internal constructor(private val activity: Activity) :
+class SaveToGallery internal constructor(private val activity: Activity) :
     PluginRegistry.RequestPermissionsResultListener {
 
     private var pendingResult: MethodChannel.Result? = null
@@ -102,9 +102,7 @@ class GallerySaver internal constructor(private val activity: Activity) :
     }
 
     companion object {
-
         private const val REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION = 2408
-
         private const val KEY_PATH = "path"
         private const val KEY_ALBUM_NAME = "albumName"
     }

@@ -1,4 +1,4 @@
-group 'carnegietechnologies.gallery_saver'
+group 'flowmobile.save_to_gallery'
 version '1.0-SNAPSHOT'
 
 buildscript {

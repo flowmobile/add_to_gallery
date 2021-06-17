@@ -2,17 +2,20 @@
 
 This package does too much:
 
-Remove Thumbnail shit
-Remove Rotation shit
 Remove Permissions shit
   just throw instead
   advise the use of permission_handler
+Be a little smarter about temporary files
+  Android seems to WRITE a new file
+  iOS needs review
+Review `files.dart`
+
+Review Jenkins, CHANGELOG, contributing and README
 Documentation
   Needs a lot of work
   Important NOTE
     Google Photos will automatically remove exact duplicate images
-    Which can cause confusion
-    
+    which can cause confusion
 
 # Gallery Saver for Flutter
 
@@ -24,7 +27,7 @@ NOTE: If you want to save network image or video link, it has to contain 'http/h
 
 ## Installation
 
-First, add `gallery_saver` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+First, add `save_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
 
 ### iOS
 
@@ -42,7 +45,7 @@ Add the following keys to your _Info.plist_ file, located in `<project root>/ios
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:save_to_gallery/save_to_gallery.dart';
 import 'package:image_picker/image_picker.dart';
 
 void main() => runApp(MyApp());
@@ -105,7 +108,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           firstButtonText = 'saving in progress...';
         });
-        GallerySaver.saveImage(recordedImage.path).then((String path) {
+        SaveToGallery.saveImage(recordedImage.path).then((String path) {
           setState(() {
             firstButtonText = 'image saved!';
           });
@@ -121,7 +124,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           secondButtonText = 'saving in progress...';
         });
-        GallerySaver.saveVideo(recordedVideo.path).then((String path) {
+        SaveToGallery.saveVideo(recordedVideo.path).then((String path) {
           setState(() {
             secondButtonText = 'video saved!';
           });
@@ -132,7 +135,7 @@ class _MyAppState extends State<MyApp> {
   void _saveNetworkVideo() async {
     String path =
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    GallerySaver.saveVideo(path).then((bool success) {
+    SaveToGallery.saveVideo(path).then((bool success) {
       setState(() {
         print('Video is saved');
       });
@@ -142,7 +145,7 @@ class _MyAppState extends State<MyApp> {
   void _saveNetworkImage() async {
     String path =
         'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    GallerySaver.saveImage(path).then((bool success) {
+    SaveToGallery.saveImage(path).then((bool success) {
       setState(() {
         print('Image is saved');
       });

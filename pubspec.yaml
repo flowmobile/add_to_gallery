@@ -1,7 +1,7 @@
-name: gallery_saver
+name: save_to_gallery
 description: Saves images and videos from network or temporary file to external storage. Both images and videos will be visible in Android Gallery and iOS Photos.
-version: 2.1.0
-homepage: https://github.com/CarnegieTechnologies/gallery_saver
+version: 0.1.0
+homepage: https://github.com/flowmobile/save_to_gallery
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -25,9 +25,9 @@ flutter:
   plugin:
     platforms:
       android:
-        package: carnegietechnologies.gallery_saver
-        pluginClass: GallerySaverPlugin
+        package: flowmobile.save_to_gallery
+        pluginClass: SaveToGalleryPlugin
       ios:
-        pluginClass: GallerySaverPlugin
+        pluginClass: SaveToGalleryPlugin
 
 

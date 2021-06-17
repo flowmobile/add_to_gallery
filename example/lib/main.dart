@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
+// import 'dart:ui' as ui;
 import 'package:path/path.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+// import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:save_to_gallery/save_to_gallery.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-final String _albumName = 'Gallery Saver';
+final String _albumName = 'Save To Gallery';
 
 double textSize = 20;
 
@@ -82,7 +82,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           firstButtonText = 'saving in progress...';
         });
-        GallerySaver.saveImage(recordedImage.path, albumName: _albumName)
+        SaveToGallery.saveImage(recordedImage.path, albumName: _albumName)
             .then((dynamic filePath) {
           print(filePath);
           setState(() {
@@ -101,7 +101,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           secondButtonText = 'saving in progress...';
         });
-        GallerySaver.saveVideo(recordedVideo.path, albumName: _albumName)
+        SaveToGallery.saveVideo(recordedVideo.path, albumName: _albumName)
             .then((dynamic filePath) {
           print(filePath);
           setState(() {
@@ -116,7 +116,7 @@ class _MyAppState extends State<MyApp> {
   void _saveNetworkVideo() async {
     String path =
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    GallerySaver.saveVideo(path, albumName: _albumName)
+    SaveToGallery.saveVideo(path, albumName: _albumName)
         .then((dynamic filePath) {
       print(filePath);
       setState(() {
@@ -129,7 +129,7 @@ class _MyAppState extends State<MyApp> {
   void _saveNetworkImage() async {
     String path =
         'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    GallerySaver.saveImage(path, albumName: _albumName)
+    SaveToGallery.saveImage(path, albumName: _albumName)
         .then((dynamic filePath) {
       print(filePath);
       setState(() {
@@ -155,7 +155,7 @@ class SaveAsset extends StatelessWidget {
         onTap: () async {
           try {
             File file = await _saveAsset(assetPath);
-            String path = await GallerySaver.saveImage(
+            String path = await SaveToGallery.saveImage(
               file.path,
               albumName: _albumName,
             );
@@ -283,7 +283,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
       File capturedFile = File(fullPath);
       await capturedFile.writeAsBytes(pngBytes);
 
-      await GallerySaver.saveImage(capturedFile.path, albumName: _albumName)
+      await SaveToGallery.saveImage(capturedFile.path, albumName: _albumName)
           .then((dynamic filePath) {
         print(filePath);
         setState(() {

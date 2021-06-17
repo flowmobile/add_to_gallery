@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:gallery_saver/files.dart';
+import 'package:save_to_gallery/files.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 
 /// Save images and videos to the gallery
-class GallerySaver {
-  static const String channelName = 'gallery_saver';
+class SaveToGallery {
+  static const String channelName = 'save_to_gallery';
   static const String methodSaveImage = 'saveImage';
   static const String methodSaveVideo = 'saveVideo';
 

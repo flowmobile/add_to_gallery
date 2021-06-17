@@ -7,13 +7,13 @@ enum MediaType: Int {
     case video
 }
 
-public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
+public class SwiftSaveToGalleryPlugin: NSObject, FlutterPlugin {
     let path = "path"
     let albumName = "albumName"
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "gallery_saver", binaryMessenger: registrar.messenger())
-        let instance = SwiftGallerySaverPlugin()
+        let channel = FlutterMethodChannel(name: "save_to_gallery", binaryMessenger: registrar.messenger())
+        let instance = SwiftSaveToGalleryPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     

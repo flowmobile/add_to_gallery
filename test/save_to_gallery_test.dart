@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:save_to_gallery/save_to_gallery.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('gallery_saver');
+  const MethodChannel channel = MethodChannel('save_to_gallery');
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -22,10 +22,10 @@ void main() {
   });
 
   test('save image', () async {
-    expect(await GallerySaver.saveImage('/storage/emulated/image.jpg'), true);
+    expect(await SaveToGallery.saveImage('/storage/emulated/image.jpg'), true);
   });
 
   test('save video', () async {
-    expect(await GallerySaver.saveVideo('/storage/emulated/video.mov'), false);
+    expect(await SaveToGallery.saveVideo('/storage/emulated/video.mov'), false);
   });
 }
