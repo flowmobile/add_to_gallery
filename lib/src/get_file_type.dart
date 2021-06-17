@@ -30,5 +30,5 @@ String getFileType(String filePath) {
   if (_imageFormats.contains(extension(filePath).toLowerCase())) {
     return 'image';
   }
-  throw ArgumentError('Path does not have an image or video file extension');
+  throw ArgumentError('Path does not have an image file extension');
 }

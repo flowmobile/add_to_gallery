@@ -1,17 +1,51 @@
 # Add to Gallery
 
+Adds images and videos to the Android Gallery and iOS Photos
+
+<a href="https://youtu.be/TUq8rw1LuXc">
+  <img src="https://flowmobile.imgix.net/users/NM99Dl5xszYqmKfU8X1Y17oEqg93/uploads/XFMKOvCYmwy64OCItDQ2/Flutter%20__%20Add%20To%20Gallery%20Package%202-22%20screenshot.png">
+</a>
+
+View example app
+
+## Installation
+
+Add `add_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+
+### iOS
+
+Add the following keys to your _Info.plist_ file, located in `<project root>/ios/Runner/Info.plist`:
+
+* `NSPhotoLibraryUsageDescription` - describe why your app needs permission for the photo library. This is called _Privacy - Photo Library Usage Description_ in the visual editor.
+
+### Android
+
+* `android.permission.WRITE_EXTERNAL_STORAGE` - Permission for usage of external storage
+
+## Important Note about Google photos
+
+Google Photos has a built-in feature to remove exact duplicates. This can be confusing behaviour. I considered addressing this behaviour in the plugin, but decided against it. But it's worth pointing out anyhow!
+
 ## Credits
 
-Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_saver) with some notable differences:
+Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_saver) with some notable differences. Enough to warrant a new package rather than a pull-request.
 
 <table>
   <tr>
     <th>Feature</th>
-    <th>add_to_gallery - <em>this package</em></th>
-    <th>[gallery_saver](https://pub.dev/packages/gallery_saver)</th>
+    <th>
+      add_to_gallery
+      <br>
+      <em>this package</em>
+    </th>
+    <th>
+      <a href="https://pub.dev/packages/gallery_saver">gallery_saver</a>
+      <br>
+      <em>original package</em>
+    </th>
   </tr>
   <tr>
-    <th>Return Formats</th>
+    <td>Return Formats</td>
     <td>
       <ul>
         <li>Returns <code>bool</code> for the success of the operation.</li>
@@ -29,7 +63,7 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
     </td>
   </tr>
   <tr>
-    <th>Temporary Files</th>
+    <td>Temporary Files</td>
     <td>
       <ul>
         <li>Unopinionated about temporary files.</li>
@@ -45,7 +79,7 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
     </td>
   </tr>
   <tr>
-    <th>Remote Files (over http)</th>
+    <td>Remote Files (over http)</td>
     <td>
       <ul>
         <li>Automatically downloads files that start with <strong>http</strong>.</li>
@@ -58,7 +92,7 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
     </td>
   </tr>
   <tr>
-    <th>Album Name</th>
+    <td>Album Name</td>
     <td>
       <ul>
         <li>Optional with default values.</li>
@@ -71,7 +105,7 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
     </td>
   </tr>
   <tr>
-    <th>Image Manipulation</th>
+    <td>Image Manipulation</td>
     <td>
       <ul>
         <li>(Android) Automatically rotates images according to EXIF data.</li>
@@ -86,163 +120,3 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
     </td>
   </tr>
 </table>
-
-# TODO
-
-  addToGallery
-    Bool deleteOriginal
-
-This package does too much:
-
-Review my @TODOs
-Review Permissions
-  I think the first call on iOS fails
-Be a little smarter about temporary files
-  Android seems to WRITE a new file
-  iOS needs review
-Review `files.dart`
-Video in README
-
-Review CHANGELOG, contributing and README
-Documentation
-  Needs a lot of work
-  Important NOTE
-    Google Photos will automatically remove exact duplicate images
-    which can cause confusion
-
-# Gallery Saver for Flutter
-
-Saves images and videos from network or temporary file to external storage. 
-Both images and videos will be visible in Android Gallery and iOS Photos.
-
-NOTE: If you want to save network image or video link, it has to contain 'http/https' prefix.
-
-
-## Installation
-
-First, add `add_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
-
-### iOS
-
-Add the following keys to your _Info.plist_ file, located in `<project root>/ios/Runner/Info.plist`:
-
-* `NSPhotoLibraryUsageDescription` - describe why your app needs permission for the photo library. This is called _Privacy - Photo Library Usage Description_ in the visual editor.
-
-### Android
-
-* `android.permission.WRITE_EXTERNAL_STORAGE` - Permission for usage of external storage
-
-### Example
-
-``` dart
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:add_to_gallery/add_to_gallery.dart';
-import 'package:image_picker/image_picker.dart';
-
-void main() => runApp(MyApp());
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  String firstButtonText = 'Take photo';
-  String secondButtonText = 'Record video';
-  double textSize = 20;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: Column(
-          children: <Widget>[
-            Flexible(
-              flex: 1,
-              child: Container(
-                child: SizedBox.expand(
-                  child: RaisedButton(
-                    color: Colors.blue,
-                    onPressed: _takePhoto,
-                    child: Text(firstButtonText,
-                        style:
-                            TextStyle(fontSize: textSize, color: Colors.white)),
-                  ),
-                ),
-              ),
-            ),
-            Flexible(
-              child: Container(
-                  child: SizedBox.expand(
-                child: RaisedButton(
-                  color: Colors.white,
-                  onPressed: _recordVideo,
-                  child: Text(secondButtonText,
-                      style: TextStyle(
-                          fontSize: textSize, color: Colors.blueGrey)),
-                ),
-              )),
-              flex: 1,
-            )
-          ],
-        ),
-      ),
-    ));
-  }
-
-  void _takePhoto() async {
-    ImagePicker.pickImage(source: ImageSource.camera)
-        .then((File recordedImage) {
-      if (recordedImage != null && recordedImage.path != null) {
-        setState(() {
-          firstButtonText = 'saving in progress...';
-        });
-        AddToGallery.saveImage(recordedImage.path).then((String path) {
-          setState(() {
-            firstButtonText = 'image saved!';
-          });
-        });
-      }
-    });
-  }
-
-  void _recordVideo() async {
-    ImagePicker.pickVideo(source: ImageSource.camera)
-        .then((File recordedVideo) {
-      if (recordedVideo != null && recordedVideo.path != null) {
-        setState(() {
-          secondButtonText = 'saving in progress...';
-        });
-        AddToGallery.saveVideo(recordedVideo.path).then((String path) {
-          setState(() {
-            secondButtonText = 'video saved!';
-          });
-        });
-      }
-    });
-  }
-  void _saveNetworkVideo() async {
-    String path =
-        'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    AddToGallery.saveVideo(path).then((bool success) {
-      setState(() {
-        print('Video is saved');
-      });
-    });
-  }
-
-  void _saveNetworkImage() async {
-    String path =
-        'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    AddToGallery.saveImage(path).then((bool success) {
-      setState(() {
-        print('Image is saved');
-      });
-    });
-  }
-}
-```

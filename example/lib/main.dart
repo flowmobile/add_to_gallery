@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:add_to_gallery/add_to_gallery.dart';
-// import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 final String _albumName = 'Add to Gallery';
@@ -30,90 +30,23 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         body: ListView(
           children: <Widget>[
-            Text(
-              'Add to Gallery',
-              style: Theme.of(context).textTheme.headline3,
-            ),
-            SaveAsset(assetPath: 'assets/local-image-1.jpg'),
-            SaveAsset(assetPath: 'assets/local-image-2.jpg'),
-            /*
-            Flexible(
-              flex: 1,
-              child: Container(
-                child: SizedBox.expand(
-                  child: TextButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.blue),
-                    ),
-                    onPressed: _takePhoto,
-                    child: Text(firstButtonText,
-                        style: TextStyle(
-                            fontSize: textSize, color: Colors.white)),
-                  ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Text(
+                  'Add to Gallery',
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
             ),
-            ScreenshotWidget(),
-            Flexible(
-              child: Container(
-                  child: SizedBox.expand(
-                child: TextButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.white),
-                  ),
-                  onPressed: _recordVideo,
-                  child: Text(secondButtonText,
-                      style: TextStyle(
-                          fontSize: textSize, color: Colors.blueGrey)),
-                ),
-              )),
-              flex: 1,
-            ),
-            */
+            SaveAsset(assetPath: 'assets/local-image-1.jpg'),
+            SaveAsset(assetPath: 'assets/local-image-2.jpg'),
+            SaveImage(),
           ],
         ),
       ),
     );
   }
-  /*
-  void _takePhoto() async {
-    ImagePicker()
-        .getImage(source: ImageSource.camera)
-        .then((PickedFile recordedImage) {
-      if (recordedImage != null && recordedImage.path != null) {
-        setState(() {
-          firstButtonText = 'saving in progress...';
-        });
-        AddToGallery.saveImage(recordedImage.path, albumName: _albumName)
-            .then((dynamic filePath) {
-          print(filePath);
-          setState(() {
-            firstButtonText = 'image saved!';
-          });
-        });
-      }
-    });
-  }
-
-  void _recordVideo() async {
-    ImagePicker()
-        .getVideo(source: ImageSource.camera)
-        .then((PickedFile recordedVideo) {
-      if (recordedVideo != null && recordedVideo.path != null) {
-        setState(() {
-          secondButtonText = 'saving in progress...';
-        });
-        AddToGallery.saveVideo(recordedVideo.path, albumName: _albumName)
-            .then((dynamic filePath) {
-          print(filePath);
-          setState(() {
-            secondButtonText = 'video saved!';
-          });
-        });
-      }
-    });
-  }
-  */
 }
 
 class SaveAsset extends StatelessWidget {
@@ -134,33 +67,78 @@ class SaveAsset extends StatelessWidget {
             String path = await AddToGallery.addToGallery(
               originalFile: file,
               albumName: _albumName,
-              deleteOriginalFile: false, // It's in a temp directory anyhow
+              deleteOriginalFile: false,
             );
-            // TODO: show this in the UI
-            // print('originalPath: ${file.path}');
-            // print('path: $path');
-            await _showAlertMessage(context, 'Asset saved with path: $path');
+            String message =
+                'Added to Gallery\n\nOriginal: ${file.path}\n\nGallery: $path';
+            await _showAlertMessage(context, message);
           } on PlatformException catch (e) {
             await _showAlertMessage(context, 'Error: ${e.message}');
           } catch (e) {
             await _showAlertMessage(context, 'Error: ${e.toString()}');
           }
         },
-        child: Column(
-          children: <Widget>[
-            Image.asset(
-              assetPath,
-              height: 200,
-            ),
-            Text('Save Local Asset'),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Image.asset(
+                assetPath,
+                height: 100,
+              ),
+              Text('Save Local Asset'),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-//
+class SaveImage extends StatelessWidget {
+  const SaveImage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () async {
+          try {
+            PickedFile? image =
+                await ImagePicker().getImage(source: ImageSource.camera);
+            if (image != null) {
+              File file = File(image.path);
+              String path = await AddToGallery.addToGallery(
+                originalFile: file,
+                albumName: _albumName,
+                deleteOriginalFile: false,
+              );
+              String message =
+                  'Added to Gallery\n\nOriginal: ${file.path}\n\nGallery: $path';
+              await _showAlertMessage(context, message);
+            }
+          } on PlatformException catch (e) {
+            await _showAlertMessage(context, 'Error: ${e.message}');
+          } catch (e) {
+            await _showAlertMessage(context, 'Error: ${e.toString()}');
+          }
+        },
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Icon(Icons.camera_alt),
+              Text('Take Photo'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> _showAlertMessage(
   BuildContext context,
   String message,
@@ -182,7 +160,6 @@ Future<void> _showAlertMessage(
   );
 }
 
-// Saves an asset
 Future<File> _copyAssetLocally(
   String path,
 ) async {
@@ -200,7 +177,6 @@ Future<File> _copyAssetLocally(
   return file;
 }
 
-// Returns a writeable file for a path
 Future<File> _getBlankFileForAsset({
   required String path,
   required String prefix,
@@ -208,6 +184,6 @@ Future<File> _getBlankFileForAsset({
   String fileExt = extension(path);
   int now = DateTime.now().millisecondsSinceEpoch;
   String fileName = '$prefix-$now$fileExt';
-  Directory directory = await getApplicationDocumentsDirectory();
+  Directory directory = await getTemporaryDirectory();
   return File('${directory.path}/$fileName');
 }
