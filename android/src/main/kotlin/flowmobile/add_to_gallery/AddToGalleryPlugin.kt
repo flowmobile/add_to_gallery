@@ -1,4 +1,4 @@
-package flowmobile.save_to_gallery
+package flowmobile.add_to_gallery
 
 import android.app.Activity
 import androidx.annotation.NonNull
@@ -10,28 +10,29 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-class SaveToGalleryPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
-    private var saveToGallery: SaveToGallery? = null
+    private var addToGallery: AddToGallery? = null
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(binding.binaryMessenger, "save_to_gallery")
+        channel = MethodChannel(binding.binaryMessenger, "add_to_gallery")
         channel.setMethodCallHandler(this)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        when (call.method) {
-            "saveImage" -> saveToGallery?.checkPermissionAndSaveFile(call, result, MediaType.image)
-            "saveVideo" -> saveToGallery?.checkPermissionAndSaveFile(call, result, MediaType.video)
-            else -> result.notImplemented()
+        if(call.method != "addToGallery"){
+            result.notImplemented()
         }
+        val type = call.argument<String>("type")
+        var mediaType = if (type == "image") MediaType.image else MediaType.video
+        addToGallery?.checkPermissionAndSaveFile(call, result, mediaType)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         this.activity = binding.activity
-        saveToGallery = SaveToGallery(activity!!)
+        addToGallery = AddToGallery(activity!!)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {

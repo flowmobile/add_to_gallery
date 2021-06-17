@@ -1,7 +1,7 @@
-name: save_to_gallery
+name: add_to_gallery
 description: Saves images and videos from network or temporary file to external storage. Both images and videos will be visible in Android Gallery and iOS Photos.
 version: 0.1.0
-homepage: https://github.com/flowmobile/save_to_gallery
+homepage: https://github.com/flowmobile/add_to_gallery
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -15,6 +15,7 @@ dependencies:
   path_provider: ^2.0.2
   http: ^0.13.1
   path: ^1.8.0
+  uuid: ^3.0.4
 
 dev_dependencies:
   flutter_test:
@@ -25,9 +26,9 @@ flutter:
   plugin:
     platforms:
       android:
-        package: flowmobile.save_to_gallery
-        pluginClass: SaveToGalleryPlugin
+        package: flowmobile.add_to_gallery
+        pluginClass: AddToGalleryPlugin
       ios:
-        pluginClass: SaveToGalleryPlugin
+        pluginClass: AddToGalleryPlugin
 
 

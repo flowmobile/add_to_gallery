@@ -7,24 +7,24 @@ enum MediaType: Int {
     case video
 }
 
-public class SwiftSaveToGalleryPlugin: NSObject, FlutterPlugin {
+public class SwiftAddToGalleryPlugin: NSObject, FlutterPlugin {
     let path = "path"
     let albumName = "albumName"
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "save_to_gallery", binaryMessenger: registrar.messenger())
-        let instance = SwiftSaveToGalleryPlugin()
+        let channel = FlutterMethodChannel(name: "add_to_gallery", binaryMessenger: registrar.messenger())
+        let instance = SwiftAddToGalleryPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if call.method == "saveImage" {
-            self.saveMedia(call, .image, result)
-        } else if call.method == "saveVideo" {
-            self.saveMedia(call, .video, result)
-        } else {
+        if call.method != "addToGallery" {
             result(FlutterMethodNotImplemented)
         }
+        let arguments = call.arguments as? [String: Any] ?? [String: Any]()
+        let type = arguments["type"] as? String
+        var mediaType = type == "image" ? MediaType.image : MediaType.video
+        self.saveMedia(call, mediaType, result)
     }
     
     /// Tries to save image to the photos app.

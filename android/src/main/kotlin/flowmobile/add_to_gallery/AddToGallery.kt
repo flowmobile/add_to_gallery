@@ -1,4 +1,4 @@
-package flowmobile.save_to_gallery
+package flowmobile.add_to_gallery
 
 import android.Manifest
 import android.app.Activity
@@ -13,7 +13,7 @@ enum class MediaType { image, video }
 /**
  * Class holding implementation of saving images and videos
  */
-class SaveToGallery internal constructor(private val activity: Activity) :
+class AddToGallery internal constructor(private val activity: Activity) :
     PluginRegistry.RequestPermissionsResultListener {
 
     private var pendingResult: MethodChannel.Result? = null

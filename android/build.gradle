@@ -1,4 +1,4 @@
-group 'flowmobile.save_to_gallery'
+group 'flowmobile.add_to_gallery'
 version '1.0-SNAPSHOT'
 
 buildscript {

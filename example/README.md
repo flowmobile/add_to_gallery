@@ -1,6 +1,6 @@
-# save_to_gallery_example
+# add_to_gallery_example
 
-Demonstrates how to use the save_to_gallery plugin.
+Demonstrates how to use the add_to_gallery plugin.
 
 ## Getting Started
 

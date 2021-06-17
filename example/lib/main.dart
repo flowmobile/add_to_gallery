@@ -1,16 +1,14 @@
 import 'dart:io';
 import 'dart:typed_data';
-// import 'dart:ui' as ui;
 import 'package:path/path.dart';
 
 import 'package:flutter/material.dart';
-// import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:save_to_gallery/save_to_gallery.dart';
+import 'package:add_to_gallery/add_to_gallery.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-final String _albumName = 'Save To Gallery';
+final String _albumName = 'Add to Gallery';
 
 double textSize = 20;
 
@@ -32,6 +30,10 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         body: ListView(
           children: <Widget>[
+            Text(
+              'Add to Gallery',
+              style: Theme.of(context).textTheme.headline3,
+            ),
             SaveAsset(assetPath: 'assets/local-image-1.jpg'),
             SaveAsset(assetPath: 'assets/local-image-2.jpg'),
             /*
@@ -82,7 +84,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           firstButtonText = 'saving in progress...';
         });
-        SaveToGallery.saveImage(recordedImage.path, albumName: _albumName)
+        AddToGallery.saveImage(recordedImage.path, albumName: _albumName)
             .then((dynamic filePath) {
           print(filePath);
           setState(() {
@@ -101,7 +103,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           secondButtonText = 'saving in progress...';
         });
-        SaveToGallery.saveVideo(recordedVideo.path, albumName: _albumName)
+        AddToGallery.saveVideo(recordedVideo.path, albumName: _albumName)
             .then((dynamic filePath) {
           print(filePath);
           setState(() {
@@ -109,32 +111,6 @@ class _MyAppState extends State<MyApp> {
           });
         });
       }
-    });
-  }
-
-  // ignore: unused_element
-  void _saveNetworkVideo() async {
-    String path =
-        'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    SaveToGallery.saveVideo(path, albumName: _albumName)
-        .then((dynamic filePath) {
-      print(filePath);
-      setState(() {
-        print('Video is saved');
-      });
-    });
-  }
-
-  // ignore: unused_element
-  void _saveNetworkImage() async {
-    String path =
-        'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    SaveToGallery.saveImage(path, albumName: _albumName)
-        .then((dynamic filePath) {
-      print(filePath);
-      setState(() {
-        print('Image is saved');
-      });
     });
   }
   */
@@ -154,11 +130,15 @@ class SaveAsset extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           try {
-            File file = await _saveAsset(assetPath);
-            String path = await SaveToGallery.saveImage(
-              file.path,
+            File file = await _copyAssetLocally(assetPath);
+            String path = await AddToGallery.addToGallery(
+              originalFile: file,
               albumName: _albumName,
+              deleteOriginalFile: false, // It's in a temp directory anyhow
             );
+            // TODO: show this in the UI
+            // print('originalPath: ${file.path}');
+            // print('path: $path');
             await _showAlertMessage(context, 'Asset saved with path: $path');
           } on PlatformException catch (e) {
             await _showAlertMessage(context, 'Error: ${e.message}');
@@ -203,7 +183,7 @@ Future<void> _showAlertMessage(
 }
 
 // Saves an asset
-Future<File> _saveAsset(
+Future<File> _copyAssetLocally(
   String path,
 ) async {
   ByteData byteData = await rootBundle.load(path);
@@ -231,68 +211,3 @@ Future<File> _getBlankFileForAsset({
   Directory directory = await getApplicationDocumentsDirectory();
   return File('${directory.path}/$fileName');
 }
-
-/*
-class ScreenshotWidget extends StatefulWidget {
-  @override
-  _ScreenshotWidgetState createState() => _ScreenshotWidgetState();
-}
-
-class _ScreenshotWidgetState extends State<ScreenshotWidget> {
-  final GlobalKey _globalKey = GlobalKey();
-  String screenshotButtonText = 'Save screenshot';
-
-  @override
-  Widget build(BuildContext context) {
-    return Flexible(
-      flex: 1,
-      child: RepaintBoundary(
-        key: _globalKey,
-        child: Container(
-          child: SizedBox.expand(
-            child: TextButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.pink),
-              ),
-              onPressed: _saveScreenshot,
-              child: Text(screenshotButtonText,
-                  style: TextStyle(fontSize: textSize, color: Colors.white)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _saveScreenshot() async {
-    setState(() {
-      screenshotButtonText = 'saving in progress...';
-    });
-    try {
-      //extract bytes
-      final RenderRepaintBoundary boundary =
-          _globalKey.currentContext.findRenderObject();
-      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      final Uint8List pngBytes = byteData.buffer.asUint8List();
-
-      //create file
-      final String dir = (await getApplicationDocumentsDirectory()).path;
-      final String fullPath = '$dir/${DateTime.now().millisecond}.png';
-      File capturedFile = File(fullPath);
-      await capturedFile.writeAsBytes(pngBytes);
-
-      await SaveToGallery.saveImage(capturedFile.path, albumName: _albumName)
-          .then((dynamic filePath) {
-        print(filePath);
-        setState(() {
-          screenshotButtonText = 'screenshot saved!';
-        });
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-}
-*/

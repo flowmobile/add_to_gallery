@@ -1,5 +1,5 @@
-name: save_to_gallery_example
-description: Demonstrates how to use the save_to_gallery plugin
+name: add_to_gallery_example
+description: Demonstrates how to use the add_to_gallery plugin
 publish_to: 'none'
 
 environment:
@@ -17,7 +17,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  save_to_gallery:
+  add_to_gallery:
     path: ../
 
 flutter:

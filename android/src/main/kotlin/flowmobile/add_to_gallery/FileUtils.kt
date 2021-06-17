@@ -1,4 +1,4 @@
-package flowmobile.save_to_gallery
+package flowmobile.add_to_gallery
 
 import android.content.ContentResolver
 import android.content.ContentValues
@@ -16,11 +16,7 @@ import java.io.*
 internal object FileUtils {
 
     private const val TAG = "FileUtils"
-    private const val SCALE_FACTOR = 50.0
     private const val BUFFER_SIZE = 1024 * 1024 * 8
-    private const val DEGREES_90 = 90
-    private const val DEGREES_180 = 180
-    private const val DEGREES_270 = 270
     private const val EOF = -1
 
     /**
@@ -36,7 +32,6 @@ internal object FileUtils {
         path: String,
         folderName: String?
     ): String? {
-
         val file = File(path)
         val extension = MimeTypeMap.getFileExtensionFromUrl(file.toString())
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
@@ -57,21 +52,17 @@ internal object FileUtils {
 
         try {
             imageUri = contentResolver.insert(imageUri, values)
-
             if (source != null) {
                 var outputStream: OutputStream? = null
                 if (imageUri != null) {
                     outputStream = contentResolver.openOutputStream(imageUri)
                 }
-
                 outputStream?.use {
                     outputStream.write(source)
                 }
-
                 if (imageUri != null) {
                     return getFilePathFromContentUri(imageUri, contentResolver)
                 }
-                
             } else {
                 if (imageUri != null) {
                     contentResolver.delete(imageUri, null, null)
@@ -92,14 +83,13 @@ internal object FileUtils {
      * @param contentResolver - content resolver
      * @return path from provided Uri
      */
-    private fun getFilePathFromContentUri(uri: Uri,
-                                          contentResolver: ContentResolver): String? {
+    private fun getFilePathFromContentUri(
+        uri: Uri,
+        contentResolver: ContentResolver
+    ): String? {
         var filePath: String? = null
-
         val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DATA), null, null, null)
-
         var columnIndex: Int
-
         cursor?.use {
             cursor.moveToFirst()
             columnIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATA)
@@ -108,7 +98,9 @@ internal object FileUtils {
         return filePath
     }
 
-    private fun getBytesFromFile(file: File): ByteArray? {
+    private fun getBytesFromFile(
+        file: File
+    ): ByteArray? {
         val size = file.length().toInt()
         val bytes = ByteArray(size)
         val buf = BufferedInputStream(FileInputStream(file))
@@ -171,16 +163,19 @@ internal object FileUtils {
                 }
             }
         } catch (fnfE: FileNotFoundException) {
-            Log.e("SaveToGallery", fnfE.message)
+            Log.e("AddToGallery", fnfE.message)
             return null
         } catch (e: Exception) {
-            Log.e("SaveToGallery", e.message)
+            Log.e("AddToGallery", e.message)
             return null
         }
         return null
     }
 
-    private fun getAlbumFolderPath(folderName: String?, mediaType: MediaType): String {
+    private fun getAlbumFolderPath(
+        folderName: String?,
+        mediaType: MediaType
+    ): String {
         var albumFolderPath: String = Environment.getExternalStorageDirectory().path
         albumFolderPath = if (TextUtils.isEmpty(folderName)) {
             val baseFolderName = if (mediaType == MediaType.image)
@@ -190,13 +185,16 @@ internal object FileUtils {
                 Environment.getExternalStoragePublicDirectory(baseFolderName).path
             ) ?: albumFolderPath
         } else {
-            createDirIfNotExist(albumFolderPath + File.separator + folderName)
-                ?: albumFolderPath
+            createDirIfNotExist(
+                albumFolderPath + File.separator + folderName
+            ) ?: albumFolderPath
         }
         return albumFolderPath
     }
 
-    private fun createDirIfNotExist(dirPath: String): String? {
+    private fun createDirIfNotExist(
+        dirPath: String
+    ): String? {
         val dir = File(dirPath)
         if (!dir.exists()) {
             if (dir.mkdirs()) {
@@ -208,4 +206,5 @@ internal object FileUtils {
             return dir.path
         }
     }
+    
 }
