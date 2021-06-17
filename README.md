@@ -22,6 +22,20 @@ Add the following keys to your _Info.plist_ file, located in `<project root>/ios
 
 * `android.permission.WRITE_EXTERNAL_STORAGE` - Permission for usage of external storage
 
+## Usage
+
+There's only one method, it returns the new path to the file in the gallery:
+
+```dart
+File file = File('/Some/Media/Path.jpg');
+String path = await AddToGallery.addToGallery(
+  originalFile: file,
+  albumName: 'My Awesome App',
+  deleteOriginalFile: false,
+);
+print(path);
+```
+
 ## Important Note about Google photos
 
 Google Photos has a built-in feature to remove exact duplicates. This can be confusing behaviour. I considered addressing this behaviour in the plugin, but decided against it. But it's worth pointing out anyhow!

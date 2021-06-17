@@ -1,6 +1,6 @@
 name: add_to_gallery
 description: Adds images to Android Gallery and iOS Photos
-version: 0.1.0+2
+version: 0.1.0+3
 homepage: https://github.com/flowmobile/add_to_gallery
 repository: https://github.com/flowmobile/add_to_gallery
 
