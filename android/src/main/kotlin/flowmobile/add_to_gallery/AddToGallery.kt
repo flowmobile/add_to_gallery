@@ -27,18 +27,17 @@ class AddToGallery internal constructor(private val activity: Activity) :
     /**
      * Saves image or video to device
      *
-     * @param methodCall - method call
+     * @param call       - method call
      * @param result     - result to be set when saving operation finishes
-     * @param mediaType    - media type
      */
     internal fun checkPermissionAndSaveFile(
-        methodCall: MethodCall,
-        result: MethodChannel.Result,
-        mediaType: MediaType
+        call: MethodCall,
+        result: MethodChannel.Result
     ) {
-        filePath = methodCall.argument<Any>(KEY_PATH)?.toString() ?: ""
-        albumName = methodCall.argument<Any>(KEY_ALBUM_NAME)?.toString() ?: ""
-        this.mediaType = mediaType
+        val type = call.argument<String>("type")!!
+        this.filePath = call.argument<String>("path")!!
+        this.albumName = call.argument<String>("albumName")!!
+        this.mediaType = if (type == "image") MediaType.image else MediaType.video
         this.pendingResult = result
 
         if (isWritePermissionGranted()) {
@@ -103,7 +102,5 @@ class AddToGallery internal constructor(private val activity: Activity) :
 
     companion object {
         private const val REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION = 2408
-        private const val KEY_PATH = "path"
-        private const val KEY_ALBUM_NAME = "albumName"
     }
 }

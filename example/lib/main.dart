@@ -10,8 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final String _albumName = 'Add to Gallery';
 
-double textSize = 20;
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -20,9 +18,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String firstButtonText = 'Take photo';
-  String secondButtonText = 'Record video';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -96,10 +91,9 @@ class SaveAsset extends StatelessWidget {
               albumName: _albumName,
               deleteOriginalFile: false,
             );
-            await _saveGalleryPath(path);
-            String message =
-                'Added to Gallery\n\nOriginal: ${file.path}\n\nGallery: $path';
-            await _showAlertMessage(context, message);
+            print('result: $path');
+            // await _saveGalleryPath(path);
+            // await _showAlertMessage(context, path);
           } on PlatformException catch (e) {
             await _showAlertMessage(context, 'Error: ${e.message}');
           } catch (e) {
@@ -143,10 +137,9 @@ class SaveImage extends StatelessWidget {
                 albumName: _albumName,
                 deleteOriginalFile: false,
               );
-              await _saveGalleryPath(path);
-              String message =
-                  'Added to Gallery\n\nOriginal: ${file.path}\n\nGallery: $path';
-              await _showAlertMessage(context, message);
+              print('result: $path');
+              // await _saveGalleryPath(path);
+              // await _showAlertMessage(context, path);
             }
           } on PlatformException catch (e) {
             await _showAlertMessage(context, 'Error: ${e.message}');
@@ -170,14 +163,17 @@ class SaveImage extends StatelessWidget {
 
 Future<void> _showAlertMessage(
   BuildContext context,
-  String message,
+  String path,
 ) async {
   await showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('Saved to Gallery'),
-        content: Text(message),
+        content: Image.file(
+          File(path),
+          height: 200,
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),

@@ -22,12 +22,13 @@ class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        if(call.method != "addToGallery"){
+        if(call.method == "addToGallery"){
+            val albumName = call.argument<String>("albumName") ?: return
+            result.success(albumName)
+            // addToGallery?.checkPermissionAndSaveFile(call, result)
+        } else {
             result.notImplemented()
         }
-        val type = call.argument<String>("type")
-        var mediaType = if (type == "image") MediaType.image else MediaType.video
-        addToGallery?.checkPermissionAndSaveFile(call, result, mediaType)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

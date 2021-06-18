@@ -29,14 +29,20 @@ class AddToGallery {
       prefix: filetype,
     );
     // Save to gallery
+    print('-- ADD TO GALLERY --');
+    print('originalFile $originalFile');
+    print('albumName $albumName');
+    print('deleteOriginalFile $deleteOriginalFile');
     var methodResults = await _channel.invokeMethod(
       'addToGallery',
       <String, dynamic>{
         'type': filetype,
         'path': copiedFile.path,
-        'albumName': albumName,
+        'album': albumName,
       },
     );
+    print('methodResults: $methodResults');
+    print('-- ------xx------ --');
     String galleryFilePath = methodResults.toString();
     // If the operation created a new file, delete our copy
     if (galleryFilePath != copiedFile.path) {

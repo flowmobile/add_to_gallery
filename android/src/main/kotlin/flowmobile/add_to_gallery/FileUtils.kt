@@ -15,7 +15,6 @@ import java.io.*
  */
 internal object FileUtils {
 
-    private const val TAG = "FileUtils"
     private const val BUFFER_SIZE = 1024 * 1024 * 8
     private const val EOF = -1
 
@@ -24,20 +23,23 @@ internal object FileUtils {
      *
      * @param contentResolver - content resolver
      * @param path            - path to temp file that needs to be stored
-     * @param folderName      - folder name for storing image
+     * @param albumName       - album name for storing image
      * @return path to newly created file
      */
     fun insertImage(
         contentResolver: ContentResolver,
         path: String,
-        folderName: String?
+        albumName: String
     ): String? {
         val file = File(path)
         val extension = MimeTypeMap.getFileExtensionFromUrl(file.toString())
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         var source = getBytesFromFile(file)
 
-        val albumDir = File(getAlbumFolderPath(folderName, MediaType.image))
+        return albumName
+
+        /*
+        val albumDir = File(getAlbumFolderPath(albumName, MediaType.image))
         val imageFilePath = File(albumDir, file.name).absolutePath
 
         val values = ContentValues()
@@ -76,6 +78,7 @@ internal object FileUtils {
             return null
         }
         return null
+        */
     }
 
     /**
@@ -114,13 +117,13 @@ internal object FileUtils {
     /**
      * @param contentResolver - content resolver
      * @param path            - path to temp file that needs to be stored
-     * @param folderName      - folder name for storing video
+     * @param albumName      - folder name for storing video
      * @return path to newly created file
      */
     fun insertVideo(
         contentResolver: ContentResolver,
         inputPath: String,
-        folderName: String?,
+        albumName: String,
         bufferSize: Int = BUFFER_SIZE
     ): String? {
 
@@ -131,7 +134,7 @@ internal object FileUtils {
         val extension = MimeTypeMap.getFileExtensionFromUrl(inputFile.toString())
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
 
-        val albumDir = File(getAlbumFolderPath(folderName, MediaType.video))
+        val albumDir = File(getAlbumFolderPath(albumName, MediaType.video))
         val videoFilePath = File(albumDir, inputFile.name).absolutePath
 
         val values = ContentValues()
@@ -173,23 +176,11 @@ internal object FileUtils {
     }
 
     private fun getAlbumFolderPath(
-        folderName: String?,
+        albumName: String,
         mediaType: MediaType
-    ): String {
-        var albumFolderPath: String = Environment.getExternalStorageDirectory().path
-        albumFolderPath = if (TextUtils.isEmpty(folderName)) {
-            val baseFolderName = if (mediaType == MediaType.image)
-                Environment.DIRECTORY_PICTURES else
-                Environment.DIRECTORY_MOVIES
-            createDirIfNotExist(
-                Environment.getExternalStoragePublicDirectory(baseFolderName).path
-            ) ?: albumFolderPath
-        } else {
-            createDirIfNotExist(
-                albumFolderPath + File.separator + folderName
-            ) ?: albumFolderPath
-        }
-        return albumFolderPath
+    ): String? {
+        var albumFolderPath: String = Environment.getExternalStorageDirectory().path + File.separator + albumName
+        return createDirIfNotExist(albumFolderPath);
     }
 
     private fun createDirIfNotExist(
@@ -197,14 +188,11 @@ internal object FileUtils {
     ): String? {
         val dir = File(dirPath)
         if (!dir.exists()) {
-            if (dir.mkdirs()) {
-                return dir.path
-            } else {
+            if (!dir.mkdirs()) {
                 return null
             }
-        } else {
-            return dir.path
         }
+        return dir.path
     }
     
 }

@@ -2,12 +2,12 @@
 # See https://dart.dev/tools/pub/glossary#lockfile
 packages:
   add_to_gallery:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.1.0+5"
+    version: "0.1.2"
   async:
     dependency: transitive
     description:
@@ -352,4 +352,4 @@ packages:
     version: "0.2.0"
 sdks:
   dart: ">=2.12.0 <3.0.0"
-  flutter: ">=2.0.0"
+  flutter: ">=2.0.4"

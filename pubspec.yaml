@@ -1,6 +1,6 @@
 name: add_to_gallery
 description: Saves a copy of images and videos to the Android Gallery and iOS Photos
-version: 0.1.0+5
+version: 0.1.2
 homepage: https://github.com/flowmobile/add_to_gallery
 repository: https://github.com/flowmobile/add_to_gallery
 

@@ -64,15 +64,15 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
       <ul>
         <li>🔥 Source file is copied to the gallery</li>
         <li>🔥 The copy is not a tmp file</li>
-        <li>👎 The URI is not returned</li>
-        <li>👎 No way to find the URI</li>
+        <li>👎 The file path is not returned</li>
+        <li>👎 No way to find the file path</li>
       </ul>
       iOS
       <ul>
         <li>🔥 Source file is linked to the gallery</li>
         <li>👎 If the source file is in a tmp directory it may be garbage collected</li>
-        <li>👎 The URI is not returned</li>
-        <li>🔥 The original URI is correct</li>
+        <li>👎 The file path is not returned</li>
+        <li>🔥 The original file path is correct</li>
       </ul>
     </td>
     <td>
@@ -80,7 +80,7 @@ Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_save
       <ul>
         <li>🔥 Source file is copied to the <a href="https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationDocumentsDirectory.html">getApplicationDocumentsDirectory</a> for persistence</li>
         <li>🔥 Your app has permission to access the file</li>
-        <li>🔥 The new URI is returned</li>
+        <li>🔥 The new file path is returned</li>
         <li>Automatically delete sourceFile - <em>defaults to false</em></li>
       </ul>
     </td>

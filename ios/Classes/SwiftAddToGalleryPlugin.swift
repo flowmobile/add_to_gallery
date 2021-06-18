@@ -39,7 +39,7 @@ public class SwiftAddToGalleryPlugin: NSObject, FlutterPlugin {
     func saveMedia(_ call: FlutterMethodCall, _ mediaType: MediaType, _ result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         let path = args![self.path] as! String
-        let albumName = args![self.albumName] as? String
+        let albumName = args![self.albumName] as! String
         
         let status = PHPhotoLibrary.authorizationStatus()
         if status == .notDetermined {
@@ -57,11 +57,9 @@ public class SwiftAddToGalleryPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func _saveMediaToAlbum(_ imagePath: String, _ mediaType: MediaType, _ albumName: String?,
+    private func _saveMediaToAlbum(_ imagePath: String, _ mediaType: MediaType, _ albumName: String,
                                    _ result: @escaping FlutterResult) {
-        if(albumName == nil){
-            self.saveFile(imagePath, mediaType, nil, result)
-        } else if let album = fetchAssetCollectionForAlbum(albumName!) {
+        if let album = fetchAssetCollectionForAlbum(albumName!) {
             self.saveFile(imagePath, mediaType, album, result)
         } else {
             // create photos album
