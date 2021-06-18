@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:path/path.dart';
-
+import 'package:add_to_gallery/add_to_gallery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:add_to_gallery/add_to_gallery.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final String _albumName = 'Add to Gallery';
 
@@ -42,9 +42,36 @@ class _MyAppState extends State<MyApp> {
             SaveAsset(assetPath: 'assets/local-image-1.jpg'),
             SaveAsset(assetPath: 'assets/local-image-2.jpg'),
             SaveImage(),
+            LastGalleryImage(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class LastGalleryImage extends StatelessWidget {
+  const LastGalleryImage({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _getGalleryPath(),
+      builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+        String? galleryPath = snapshot.hasData ? snapshot.data : null;
+        if (galleryPath == null) {
+          return Text(
+            'When you restart the app, the last saved item will render here',
+          );
+        } else {
+          return Image.file(
+            File(galleryPath),
+            height: 100,
+          );
+        }
+      },
     );
   }
 }
@@ -69,6 +96,7 @@ class SaveAsset extends StatelessWidget {
               albumName: _albumName,
               deleteOriginalFile: false,
             );
+            await _saveGalleryPath(path);
             String message =
                 'Added to Gallery\n\nOriginal: ${file.path}\n\nGallery: $path';
             await _showAlertMessage(context, message);
@@ -115,6 +143,7 @@ class SaveImage extends StatelessWidget {
                 albumName: _albumName,
                 deleteOriginalFile: false,
               );
+              await _saveGalleryPath(path);
               String message =
                   'Added to Gallery\n\nOriginal: ${file.path}\n\nGallery: $path';
               await _showAlertMessage(context, message);
@@ -186,4 +215,16 @@ Future<File> _getBlankFileForAsset({
   String fileName = '$prefix-$now$fileExt';
   Directory directory = await getTemporaryDirectory();
   return File('${directory.path}/$fileName');
+}
+
+Future<void> _saveGalleryPath(
+  String path,
+) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('galleryPath', path);
+}
+
+Future<String?> _getGalleryPath() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('galleryPath');
 }
