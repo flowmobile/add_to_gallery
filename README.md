@@ -24,113 +24,96 @@ Add the following keys to your _Info.plist_ file, located in `<project root>/ios
 
 ## Usage
 
-There's only one method, it returns the new path to the file in the gallery:
+There's only one method. It copies the source file to the gallery and returns the new path.
 
 ```dart
-File file = File('/Some/Media/Path.jpg');
 String path = await AddToGallery.addToGallery(
-  originalFile: file,
+  originalFile: File('/Some/Media/Path.jpg'),
   albumName: 'My Awesome App',
   deleteOriginalFile: false,
 );
 print(path);
 ```
 
-## Important Note about Google photos
+### An Important Note about Google photos
 
-Google Photos has a built-in feature to remove exact duplicates. This can be confusing behaviour. I considered addressing this behaviour in the plugin, but decided against it. But it's worth pointing out anyhow!
+Google Photos has a built-in feature to remove exact duplicates. It can be confusing to see your media disappearing like this. I considered addressing this behaviour in the plugin, but decided against it. I expect plugin users to be creating unique images with the camera or other methods.
 
-## Credits
+## Credits & Comparison
 
-Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_saver) with some notable differences. Enough to warrant a new package rather than a pull-request.
+Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_saver) with some notable differences. Enough to warrant a new package rather than a pull-request. Generally speaking, I've simplified the package somewhat and unified the behaviour on iOS and Android.
 
 <table>
   <tr>
     <th>Feature</th>
     <th>
-      add_to_gallery
-      <br>
-      <em>this package</em>
-    </th>
-    <th>
       <a href="https://pub.dev/packages/gallery_saver">gallery_saver</a>
       <br>
       <em>original package</em>
     </th>
+    <th>
+      <strong>add_to_gallery</strong>
+      <br>
+      <em>this package</em>
+    </th>
   </tr>
   <tr>
-    <td>Return Formats</td>
+    <td>General Behaviour</td>
     <td>
+      Android
       <ul>
-        <li>Returns <code>bool</code> for the success of the operation.</li>
-        <li>This is problematic on Android. The file is <strong>copied</strong> to a new location. There's no way to know the new path.</li>
-        <li>This is OK on iOS. The file keeps the same URI. <em>Think of it like a shortcut being added to the gallery</em>.</li>
+        <li>🔥 Source file is copied to the gallery</li>
+        <li>🔥 The copy is not a tmp file</li>
+        <li>👎 The URI is not returned</li>
+        <li>👎 No way to find the URI</li>
+      </ul>
+      iOS
+      <ul>
+        <li>🔥 Source file is linked to the gallery</li>
+        <li>👎 If the source file is in a tmp directory it may be garbage collected</li>
+        <li>👎 The URI is not returned</li>
+        <li>🔥 The original URI is correct</li>
       </ul>
     </td>
     <td>
+      Android and iOS
       <ul>
-        <li>Returns the <code>path</code> of the file in the gallery.</li>
-        <li>Android and iOS now behave in the same way.</li>
-        <li>The file is copied to a new, public location, the path is returned.</li>
-        <li>You are free to delete your source file after the operation.</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td>Temporary Files</td>
-    <td>
-      <ul>
-        <li>Unopinionated about temporary files.</li>
-        <li>Not a problem on Android as the file is copied (see above).</li>
-        <li>On iOS, there's no guarantee that a temporary file will not be deleted.</li>
-      </ul>
-    </td>
-    <td>
-      <ul>
-        <li>Always copies files to <code>getApplicationDocumentsDirectory</code> for persistence.</li>
-        <li>Always returns a new file path (see above).</li>
+        <li>🔥 Source file is copied to the <a href="https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationDocumentsDirectory.html">getApplicationDocumentsDirectory</a> for persistence</li>
+        <li>🔥 Your app has permission to access the file</li>
+        <li>🔥 The new URI is returned</li>
+        <li>Automatically delete sourceFile - <em>defaults to false</em></li>
       </ul>
     </td>
   </tr>
   <tr>
-    <td>Remote Files (over http)</td>
-    <td>
-      <ul>
-        <li>Automatically downloads files that start with <strong>http</strong>.</li>
-      </ul>
+    <td>Return Value</td>
+    <td>Returns <code>bool</code> for the success of the operation</ul>
     </td>
-    <td>
-      <ul>
-        <li>Does not download files that start with <strong>http</strong>.</li>
-      </ul>
-    </td>
+    <td>Returns the <code>path</code> of the file in the gallery</td>
+  </tr>
+  <tr>
+    <td>Remote Files</td>
+    <td>Automatically downloads files that start with <strong>http</strong></td>
+    <td>Does not download files that start with <strong>http</strong></td>
   </tr>
   <tr>
     <td>Album Name</td>
-    <td>
-      <ul>
-        <li>Optional with default values.</li>
-      </ul>
-    </td>
-    <td>
-      <ul>
-        <li>Is required.</li>
-      </ul>
-    </td>
+    <td>Optional with default values</td>
+    <td>Is required</td>
   </tr>
   <tr>
     <td>Image Manipulation</td>
     <td>
+      Android
       <ul>
-        <li>(Android) Automatically rotates images according to EXIF data.</li>
-        <li>(Android) Thumbnails are created (this is deprecated behaviour).</li>
-        <li>(iOS) Does not manipulate images.</li>
+        <li>Rotates images according to EXIF data</li>
+        <li>Creates Thumbnails</li>
+      </ul>
+      iOS
+      <ul>
+        <li>Does not manipulate images</li>
       </ul>
     </td>
-    <td>
-      <ul>
-        <li>Does not manipulate images.</li>
-      </ul>
-    </td>
+    <td>Does not manipulate images</td>
   </tr>
 </table>

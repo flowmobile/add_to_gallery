@@ -1,6 +1,6 @@
 name: add_to_gallery
-description: Adds images to Android Gallery and iOS Photos
-version: 0.1.0+3
+description: Saves a copy of images and videos to the Android Gallery and iOS Photos
+version: 0.1.0+5
 homepage: https://github.com/flowmobile/add_to_gallery
 repository: https://github.com/flowmobile/add_to_gallery
 
@@ -32,5 +32,3 @@ flutter:
         pluginClass: AddToGalleryPlugin
       ios:
         pluginClass: AddToGalleryPlugin
-
-
