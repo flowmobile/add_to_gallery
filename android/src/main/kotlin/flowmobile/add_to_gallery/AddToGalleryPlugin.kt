@@ -38,8 +38,8 @@ class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler {
             */
             val album = call.argument<String>("album")!!
             val path = call.argument<String>("path")!!
-            result.error("wip", "Album: ${album}\n\npath: ${path}", null)
-            // result.success(null)
+            // result.error("wip", "Album: ${album}\n\npath: ${path}", null)
+            result.success(null)
         } else {
             result.notImplemented()
         }
