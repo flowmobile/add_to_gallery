@@ -7,13 +7,14 @@ environment:
   flutter: ^2.0.4
 
 dependencies:
-  image_picker: ^0.7.5+4
-  path_provider: ^2.0.2
-  http: ^0.13.3
-  path: ^1.8.0
-  shared_preferences: ^2.0.6
   add_to_gallery:
     path: ../
+  http: ^0.13.3
+  image_picker: ^0.7.5+4
+  path_provider: ^2.0.2
+  path: ^1.8.0
+  permission_handler: ^8.1.1
+  shared_preferences: ^2.0.6
 
   flutter:
     sdk: flutter

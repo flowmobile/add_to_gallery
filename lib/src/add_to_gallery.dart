@@ -11,7 +11,7 @@ class AddToGallery {
   /// Makes a COPY of the file and saves it to the gallery
   ///
   /// Returns the path of the new file in the gallery
-  static Future<String> addToGallery({
+  static Future<File> addToGallery({
     /// The original file to copy to the gallery
     required File originalFile,
 
@@ -29,11 +29,7 @@ class AddToGallery {
       prefix: filetype,
     );
     // Save to gallery
-    print('-- ADD TO GALLERY --');
-    print('originalFile $originalFile');
-    print('albumName $albumName');
-    print('deleteOriginalFile $deleteOriginalFile');
-    var methodResults = await _channel.invokeMethod(
+    String? methodResults = await _channel.invokeMethod(
       'addToGallery',
       <String, dynamic>{
         'type': filetype,
@@ -41,18 +37,20 @@ class AddToGallery {
         'album': albumName,
       },
     );
-    print('methodResults: $methodResults');
-    print('-- ------xx------ --');
-    String galleryFilePath = methodResults.toString();
-    // If the operation created a new file, delete our copy
-    if (galleryFilePath != copiedFile.path) {
+    // Nothing? Probably Android, return the copied file
+    if (methodResults == null) {
+      return copiedFile;
+    }
+    File galleryFile = File(methodResults.toString());
+    // If the operation created a NEW file, delete our copy
+    if (galleryFile.path != copiedFile.path) {
       copiedFile.delete();
     }
     // Delete the original file?
     if (deleteOriginalFile) {
       originalFile.delete();
     }
-    // Return the new path
-    return galleryFilePath;
+    // Return the new file
+    return galleryFile;
   }
 }

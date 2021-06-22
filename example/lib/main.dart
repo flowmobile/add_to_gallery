@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final String _albumName = 'Add to Gallery';
@@ -85,19 +86,21 @@ class SaveAsset extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           try {
-            File file = await _copyAssetLocally(assetPath);
-            String path = await AddToGallery.addToGallery(
-              originalFile: file,
+            File localFile = await _copyAssetLocally(assetPath);
+            if (!await Permission.photos.request().isGranted) {
+              throw ('Permission Required');
+            }
+            File file = await AddToGallery.addToGallery(
+              originalFile: localFile,
               albumName: _albumName,
-              deleteOriginalFile: false,
+              deleteOriginalFile: true,
             );
-            print('result: $path');
-            // await _saveGalleryPath(path);
-            // await _showAlertMessage(context, path);
+            await _saveGalleryPath(file.path);
+            await _showAlertMessage(context, file.path);
           } on PlatformException catch (e) {
-            await _showAlertMessage(context, 'Error: ${e.message}');
+            await _showError(context, 'Error: ${e.message}');
           } catch (e) {
-            await _showAlertMessage(context, 'Error: ${e.toString()}');
+            await _showError(context, 'Error: ${e.toString()}');
           }
         },
         child: Padding(
@@ -131,20 +134,22 @@ class SaveImage extends StatelessWidget {
             PickedFile? image =
                 await ImagePicker().getImage(source: ImageSource.camera);
             if (image != null) {
-              File file = File(image.path);
-              String path = await AddToGallery.addToGallery(
-                originalFile: file,
+              File cameraFile = File(image.path);
+              if (!await Permission.photos.request().isGranted) {
+                throw ('Permission Required');
+              }
+              File file = await AddToGallery.addToGallery(
+                originalFile: cameraFile,
                 albumName: _albumName,
-                deleteOriginalFile: false,
+                deleteOriginalFile: true,
               );
-              print('result: $path');
-              // await _saveGalleryPath(path);
-              // await _showAlertMessage(context, path);
+              await _saveGalleryPath(file.path);
+              await _showAlertMessage(context, file.path);
             }
           } on PlatformException catch (e) {
-            await _showAlertMessage(context, 'Error: ${e.message}');
+            await _showError(context, 'Error: ${e.message}');
           } catch (e) {
-            await _showAlertMessage(context, 'Error: ${e.toString()}');
+            await _showError(context, 'Error: ${e.toString()}');
           }
         },
         child: Padding(
@@ -174,6 +179,27 @@ Future<void> _showAlertMessage(
           File(path),
           height: 200,
         ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> _showError(
+  BuildContext context,
+  String message,
+) async {
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Saved to Gallery'),
+        content: Text(message),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),

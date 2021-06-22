@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>en</string>
+	<string>To read and write application photos</string>
 	<key>NSCameraUsageDescription</key>
-	<string>en</string>
+	<string>To take photos and video</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>en</string>
+	<string>To record video and audio</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
