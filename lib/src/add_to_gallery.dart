@@ -7,7 +7,6 @@ import 'package:add_to_gallery/src/get_file_type.dart';
 /// Save images and videos to the gallery
 class AddToGallery {
   static const MethodChannel _channel = MethodChannel('add_to_gallery');
-  static String _platform = Platform.operatingSystem;
 
   /// Makes a COPY of the file and saves it to the gallery
   ///
@@ -29,6 +28,7 @@ class AddToGallery {
       originalFile: originalFile,
       prefix: filetype,
     );
+
     // Save to gallery
     String? methodResults = await _channel.invokeMethod(
       'addToGallery',
@@ -39,12 +39,10 @@ class AddToGallery {
       },
     );
     // Nothing? Probably Android, return the copied file
-    File galleryFile;
     if (methodResults == null) {
-      galleryFile = copiedFile;
-    } else {
-      galleryFile = File(methodResults.toString());
+      return copiedFile;
     }
+    File galleryFile = File(methodResults.toString());
     // If the operation created a NEW file, delete our copy
     if (galleryFile.path != copiedFile.path) {
       copiedFile.delete();

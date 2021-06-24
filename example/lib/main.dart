@@ -87,7 +87,12 @@ class SaveAsset extends StatelessWidget {
         onTap: () async {
           try {
             File localFile = await _copyAssetLocally(assetPath);
+            // iOS
             if (!await Permission.photos.request().isGranted) {
+              throw ('Permission Required');
+            }
+            // Android (v9 and below)
+            if (!await Permission.storage.request().isGranted) {
               throw ('Permission Required');
             }
             File file = await AddToGallery.addToGallery(
@@ -135,7 +140,12 @@ class SaveImage extends StatelessWidget {
                 await ImagePicker().getImage(source: ImageSource.camera);
             if (image != null) {
               File cameraFile = File(image.path);
+              // iOS
               if (!await Permission.photos.request().isGranted) {
+                throw ('Permission Required');
+              }
+              // Android (v9 and below)
+              if (!await Permission.storage.request().isGranted) {
                 throw ('Permission Required');
               }
               File file = await AddToGallery.addToGallery(
