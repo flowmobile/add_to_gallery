@@ -80,7 +80,7 @@ The [example app](/example) shows a few more edge-cases in action.
 
 Add to Gallery is based on [gallery_saver](https://pub.dev/packages/gallery_saver) with some notable differences. Enough to warrant a new package rather than a pull-request. Generally speaking, I've simplified the API and unified the behaviour on iOS and Android. It also supports scoped storage on Android (which will be [enforced with Android 11](https://developer.android.com/about/versions/11/privacy/storage))
 
-We hired [Kajalben Gondaliya](https://www.upwork.com/freelancers/kajalbengondaliya) to refactor the Android methods to function on Android 10 and 11.
+Big thanks to the [Tecocraft LTD team](https://www.tecocraft.co.uk/) for Android functionality on Android 10 and 11.
 
 <table>
   <tr>
