@@ -14,9 +14,7 @@ Add `add_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter
 
 ## Permissions
 
-This plugin **does not** manage permissions for you. _By excluding permissions from our plugin we have created a simple, reliable plugin._
-
-That said, you need the following permissions in your app:
+You need the following permissions in your app:
 
 * **iOS**
   * `NSPhotoLibraryUsageDescription`
@@ -24,8 +22,10 @@ That said, you need the following permissions in your app:
 * **Android**
   * `READ_EXTERNAL_STORAGE`
   * `WRITE_EXTERNAL_STORAGE`
-  * On Android 10 and below, this allows the plugin to read and write to the Photo Gallery.
-  * On Android 11 and above, these are simply ignored. The plugin continues to function as expected.
+  * If you target Android 10, you will also need the [requestLegacyExternalStorage="true"](https://developer.android.com/training/data-storage/use-cases#opt-out-in-production-app) in your AndroidManifest.
+
+
+This plugin **does not** manage permissions for you. _By excluding permissions from our plugin we have created a simple, reliable plugin._
 
 We recommend using [permission_handler](https://pub.dev/packages/permission_handler) to handle permissions.
 

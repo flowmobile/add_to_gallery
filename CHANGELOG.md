@@ -1,3 +1,7 @@
+## 0.2.0+2
+
+* Documentation for Android 10 permissions
+
 ## 0.2.0
 
 * No longer handles permissions internally (use [permission_handler](https://pub.dev/packages/permission_handler) instead)
