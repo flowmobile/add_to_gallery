@@ -99,6 +99,7 @@ class SaveAsset extends StatelessWidget {
               originalFile: localFile,
               albumName: _albumName,
               deleteOriginalFile: true,
+              keepFilename: true
             );
             await _saveGalleryPath(file.path);
             await _showAlertMessage(context, file.path);
@@ -152,6 +153,7 @@ class SaveImage extends StatelessWidget {
                 originalFile: cameraFile,
                 albumName: _albumName,
                 deleteOriginalFile: true,
+                keepFilename: true
               );
               await _saveGalleryPath(file.path);
               await _showAlertMessage(context, file.path);
