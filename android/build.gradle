@@ -2,7 +2,7 @@ group 'flowmobile.add_to_gallery'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.3.41'
+    ext.kotlin_version = '1.5.31'
     ext.kotlinCoroutinesVersion = '1.2.2'
     repositories {
         google()
