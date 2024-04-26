@@ -20,6 +20,9 @@ class AddToGallery {
 
     /// Should we delete the original file after saving?
     required bool deleteOriginalFile,
+
+    /// Should we keep the same file name of the file
+    required bool keepFilename
   }) async {
     // Is it an image or video?
     String filetype = getFileType(originalFile.path);
@@ -27,6 +30,7 @@ class AddToGallery {
     File copiedFile = await copyToPermanentDirectory(
       originalFile: originalFile,
       prefix: filetype,
+      keepFilename: keepFilename
     );
 
     // Save to gallery
