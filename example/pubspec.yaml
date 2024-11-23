@@ -9,12 +9,12 @@ environment:
 dependencies:
   add_to_gallery:
     path: ../
-  http: ^0.13.3
-  image_picker: ^0.7.5+4
-  path_provider: ^2.0.2
-  path: ^1.8.0
-  permission_handler: ^8.1.1
-  shared_preferences: ^2.0.6
+  device_info_plus: ^11.1.1
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  path: 
+  permission_handler: ^11.3.1
+  shared_preferences: ^2.3.3
 
   flutter:
     sdk: flutter
