@@ -32,6 +32,7 @@ void main() {
         originalFile: originalFile,
         albumName: 'Add to Gallery',
         deleteOriginalFile: true,
+        keepFilename: true
       ),
       true,
     );
@@ -44,6 +45,7 @@ void main() {
         originalFile: originalFile,
         albumName: 'Add to Gallery',
         deleteOriginalFile: true,
+        keepFilename: true
       ),
       false,
     );
