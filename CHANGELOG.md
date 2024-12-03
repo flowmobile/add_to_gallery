@@ -2,6 +2,7 @@
 
 - Update iOS & Android build system files
 - Adds option to keep the original filename, thank you @Correct-Syntax
+- Documentation for permissions on different Android versions
 
 ## 0.3.0
 
