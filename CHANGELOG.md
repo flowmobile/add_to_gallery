@@ -1,3 +1,7 @@
+## 0.4.0+1
+
+- Ran `dart format .` as advised by the Pub Points page
+
 ## 0.4.0
 
 - Update iOS & Android build system files
