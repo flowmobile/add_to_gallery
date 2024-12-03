@@ -8,11 +8,10 @@ var _uuid = Uuid();
 /// Copies the file to the Application Documents Directory
 ///
 /// This means that any temporary files are persisted
-Future<File> copyToPermanentDirectory({
-  required File originalFile,
-  required String prefix,
-  required bool keepFilename
-}) async {
+Future<File> copyToPermanentDirectory(
+    {required File originalFile,
+    required String prefix,
+    required bool keepFilename}) async {
   String fileExt = extension(originalFile.path);
   String fileName = '';
   if (keepFilename == true) {

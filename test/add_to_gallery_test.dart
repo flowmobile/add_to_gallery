@@ -29,11 +29,10 @@ void main() {
     File originalFile = File('/storage/emulated/image.jpg');
     expect(
       await AddToGallery.addToGallery(
-        originalFile: originalFile,
-        albumName: 'Add to Gallery',
-        deleteOriginalFile: true,
-        keepFilename: true
-      ),
+          originalFile: originalFile,
+          albumName: 'Add to Gallery',
+          deleteOriginalFile: true,
+          keepFilename: true),
       true,
     );
   });
@@ -42,11 +41,10 @@ void main() {
     File originalFile = File('/storage/emulated/video.mov');
     expect(
       await AddToGallery.addToGallery(
-        originalFile: originalFile,
-        albumName: 'Add to Gallery',
-        deleteOriginalFile: true,
-        keepFilename: true
-      ),
+          originalFile: originalFile,
+          albumName: 'Add to Gallery',
+          deleteOriginalFile: true,
+          keepFilename: true),
       false,
     );
   });
