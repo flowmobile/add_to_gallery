@@ -1,3 +1,7 @@
+## 0.4.0
+
+- Update iOS & Android build system files
+
 ## 0.3.0
 
 - Update kotlin version to 1.5.31
