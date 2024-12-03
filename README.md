@@ -16,14 +16,16 @@ Add `add_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter
 
 You need the following permissions in your app:
 
-* **iOS**
-  * `NSPhotoLibraryUsageDescription`
-  * This allows the plugin to use the [PHPhotoLibrary](https://developer.apple.com/documentation/photokit/phphotolibrary/) APIs to add assets to the user's photo library.
-* **Android**
-  * `READ_EXTERNAL_STORAGE`
-  * `WRITE_EXTERNAL_STORAGE`
-  * If you target Android 10, you will also need the [requestLegacyExternalStorage="true"](https://developer.android.com/training/data-storage/use-cases#opt-out-in-production-app) in your AndroidManifest.
-
+- **iOS**
+  - `NSPhotoLibraryUsageDescription`
+  - This allows the plugin to use the [PHPhotoLibrary](https://developer.apple.com/documentation/photokit/phphotolibrary/) APIs to add assets to the user's photo library.
+- **Android**
+  - `READ_EXTERNAL_STORAGE`
+  - `WRITE_EXTERNAL_STORAGE`
+  - If you target Android 10, you will also need the [requestLegacyExternalStorage="true"](https://developer.android.com/training/data-storage/use-cases#opt-out-in-production-app) in your AndroidManifest.
+  - NB: Android < 13 needs `storge` permission
+  - NB: Android >= 13 needs `photos` permission
+    - ^ the example app shows how to request these permissions
 
 This plugin **does not** manage permissions for you. _By excluding permissions from our plugin we have created a simple, reliable plugin._
 
@@ -45,24 +47,40 @@ print("Savd to gallery with Path: ${file.path}");
 Using [permission_handler](https://pub.dev/packages/permission_handler), this may look like:
 
 ```dart
-try {
-  // iOS
-  if (!await Permission.photos.request().isGranted) {
-    throw ('Permission Required');
+Future<void> _addToGalleryExample() async {
+  try {
+    await _grantPermissions();
+    File file = await AddToGallery.addToGallery(
+      originalFile: File('/Some/Media/Path.jpg'),
+      albumName: 'My Awesome App',
+      deleteOriginalFile: true,
+    );
+    print("Savd to gallery with Path: ${file.path}");
+  } catch(e) {
+    print("Error: $e");
   }
-  // Android (10 and below)
-  if (!await Permission.storage.request().isGranted) {
-    throw ('Permission Required');
+}
+
+Future<void> _grantPermissions() async {
+  final int? androidVersion = Platform.isAndroid
+      ? (await DeviceInfoPlugin().androidInfo).version.sdkInt
+      : null;
+  // We need storage on:
+  // - iOS to pick files from other apps
+  // - Android < 13 for legacy access
+  if (Platform.isIOS || (androidVersion != null && androidVersion <= 32)) {
+    if (!await Permission.storage.request().isGranted) {
+      throw ('Storage Permission Required');
+    }
   }
-  // Add to the gallery
-  File file = await AddToGallery.addToGallery(
-    originalFile: File('/Some/Media/Path.jpg'),
-    albumName: 'My Awesome App',
-    deleteOriginalFile: true,
-  );
-  print("Savd to gallery with Path: ${file.path}");
-} catch(e) {
-  print("Error: $e");
+  // We need photos on:
+  // - iOS to pick files from this app
+  // - Android >= 13
+  if (Platform.isIOS || (androidVersion != null && androidVersion >= 33)) {
+    if (!await Permission.photos.request().isGranted) {
+      throw ('Photos Permission Required');
+    }
+  }
 }
 ```
 
@@ -70,11 +88,11 @@ try {
 
 The [example app](/example) shows a few more edge-cases in action.
 
-* Uses [permission_handler](https://pub.dev/packages/permission_handler) to request permissions
-* Uses [image_picker](https://pub.dev/packages/image_picker) to take photos with the camera
-* Copies assets to the gallery
-* Uses [shared_preferences](https://pub.dev/packages/shared_preferences) to save and read the file path locally
-  * _This shows that the assets are still accessible between reboots_
+- Uses [permission_handler](https://pub.dev/packages/permission_handler) to request permissions
+- Uses [image_picker](https://pub.dev/packages/image_picker) to take photos with the camera
+- Copies assets to the gallery
+- Uses [shared_preferences](https://pub.dev/packages/shared_preferences) to save and read the file path locally
+  - _This shows that the assets are still accessible between reboots_
 
 ## Credits & Comparison
 

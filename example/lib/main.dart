@@ -87,20 +87,14 @@ class SaveAsset extends StatelessWidget {
         onTap: () async {
           try {
             File localFile = await _copyAssetLocally(assetPath);
-            // iOS
-            if (!await Permission.photos.request().isGranted) {
-              throw ('Permission Required');
-            }
-            // Android (v9 and below)
-            if (!await Permission.storage.request().isGranted) {
-              throw ('Permission Required');
-            }
+            // Grant permission
+            await _grantPermissions();
+            // Save
             File file = await AddToGallery.addToGallery(
-              originalFile: localFile,
-              albumName: _albumName,
-              deleteOriginalFile: true,
-              keepFilename: true
-            );
+                originalFile: localFile,
+                albumName: _albumName,
+                deleteOriginalFile: true,
+                keepFilename: true);
             await _saveGalleryPath(file.path);
             await _showAlertMessage(context, file.path);
           } on PlatformException catch (e) {
@@ -137,27 +131,22 @@ class SaveImage extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           try {
+            // iOS and Android need camera access
+            if (!await Permission.camera.request().isGranted) {
+              throw ('Camera Permission Required');
+            }
             XFile? image =
                 await ImagePicker().pickImage(source: ImageSource.camera);
             if (image != null) {
-              File cameraFile = File(image.path);
-              // iOS
-              if (!await Permission.photos.request().isGranted) {
-                throw ('Permission Required');
-              }
-              // Android (v9 and below)
-              final androidInfo = await DeviceInfoPlugin().androidInfo;
-              if (androidInfo.version.sdkInt <= 32) {
-                if (!await Permission.storage.request().isGranted) {
-                  throw ('Permission Required');
-                }
-              }
+              File originalFile = File(image.path);
+              // Grant permission
+              await _grantPermissions();
+              // Save
               File file = await AddToGallery.addToGallery(
-                originalFile: cameraFile,
-                albumName: _albumName,
-                deleteOriginalFile: true,
-                keepFilename: true
-              );
+                  originalFile: originalFile,
+                  albumName: _albumName,
+                  deleteOriginalFile: true,
+                  keepFilename: true);
               await _saveGalleryPath(file.path);
               await _showAlertMessage(context, file.path);
             }
@@ -224,6 +213,28 @@ Future<void> _showError(
       );
     },
   );
+}
+
+Future<void> _grantPermissions() async {
+  final int? androidVersion = Platform.isAndroid
+      ? (await DeviceInfoPlugin().androidInfo).version.sdkInt
+      : null;
+  // We need storage on:
+  // - iOS to pick files from other apps
+  // - Android < 13 for legacy access
+  if (Platform.isIOS || (androidVersion != null && androidVersion <= 32)) {
+    if (!await Permission.storage.request().isGranted) {
+      throw ('Storage Permission Required');
+    }
+  }
+  // We need photos on:
+  // - iOS to pick files from this app
+  // - Android >= 13
+  if (Platform.isIOS || (androidVersion != null && androidVersion >= 33)) {
+    if (!await Permission.photos.request().isGranted) {
+      throw ('Photos Permission Required');
+    }
+  }
 }
 
 Future<File> _copyAssetLocally(
