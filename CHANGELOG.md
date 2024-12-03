@@ -1,6 +1,7 @@
 ## 0.4.0
 
 - Update iOS & Android build system files
+- Adds option to keep the original filename, thank you @Correct-Syntax
 
 ## 0.3.0
 
