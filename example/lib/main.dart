@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:add_to_gallery/add_to_gallery.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
               child: Center(
                 child: Text(
                   'Add to Gallery',
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
             ),
@@ -99,6 +99,7 @@ class SaveAsset extends StatelessWidget {
               originalFile: localFile,
               albumName: _albumName,
               deleteOriginalFile: true,
+              keepFilename: true
             );
             await _saveGalleryPath(file.path);
             await _showAlertMessage(context, file.path);
@@ -136,8 +137,8 @@ class SaveImage extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           try {
-            PickedFile? image =
-                await ImagePicker().getImage(source: ImageSource.camera);
+            XFile? image =
+                await ImagePicker().pickImage(source: ImageSource.camera);
             if (image != null) {
               File cameraFile = File(image.path);
               // iOS
@@ -145,13 +146,17 @@ class SaveImage extends StatelessWidget {
                 throw ('Permission Required');
               }
               // Android (v9 and below)
-              if (!await Permission.storage.request().isGranted) {
-                throw ('Permission Required');
+              final androidInfo = await DeviceInfoPlugin().androidInfo;
+              if (androidInfo.version.sdkInt <= 32) {
+                if (!await Permission.storage.request().isGranted) {
+                  throw ('Permission Required');
+                }
               }
               File file = await AddToGallery.addToGallery(
                 originalFile: cameraFile,
                 albumName: _albumName,
                 deleteOriginalFile: true,
+                keepFilename: true
               );
               await _saveGalleryPath(file.path);
               await _showAlertMessage(context, file.path);
