@@ -24,9 +24,7 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace = "flowmobile.add_to_gallery"
-    }
+    namespace = "flowmobile.add_to_gallery"
 
     compileSdk = 34
 
