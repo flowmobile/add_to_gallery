@@ -1,3 +1,7 @@
+## 0.5.0
+
+- Added Android namespace to avoid conflicts with other packages
+
 ## 0.4.0+1
 
 - Ran `dart format .` as advised by the Pub Points page
