@@ -8,6 +8,8 @@ Adds images and videos to the Android Gallery and iOS Photos
 
 View example app
 
+💡 There are a couple of important notes about **Google photos** and **iOS filepaths**. Jump to the end of this page for info!
+
 ## Installation
 
 Add `add_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
@@ -40,6 +42,7 @@ File file = await AddToGallery.addToGallery(
   originalFile: File('/Some/Media/Path.jpg'),
   albumName: 'My Awesome App',
   deleteOriginalFile: false,
+  keepFilename: true,
 );
 print("Savd to gallery with Path: ${file.path}");
 ```
@@ -54,6 +57,7 @@ Future<void> _addToGalleryExample() async {
       originalFile: File('/Some/Media/Path.jpg'),
       albumName: 'My Awesome App',
       deleteOriginalFile: true,
+      keepFilename: true,
     );
     print("Savd to gallery with Path: ${file.path}");
   } catch(e) {
@@ -180,6 +184,29 @@ Big thanks to the [Tecocraft LTD team](https://www.tecocraft.co.uk/) for Android
   </tr>
 </table>
 
-## An Important Note about Google photos
+## 💡 An Important Note about Google photos
 
 Google Photos has a built-in feature to remove exact duplicates. It can be confusing to see your media disappearing like this. I considered addressing this behaviour in the plugin, but decided against it. I expect plugin users to be creating unique images with the camera or other methods.
+
+## 💡 An Important Note about iOS Filepaths
+
+Simply, it will change when new versions of your app are released. For example:
+
+- The user installs `1.0.0` of your app, the path is:
+  `.../<A-UNIQUE-DIRECTORY>/Documents/your-file.jpg`
+- The user upgrades to `2.0.0`, the path is now:
+  `.../<A-DIFFERENT-UNIQUE-DIRECTORY>/Documents/your-file.jpg`
+
+This becomes an issue when you try to access the file later, as the path has changed.
+
+To handle this, you can use the `path_provider` package to build the path dynamically. Here's an example:
+
+```dart
+// 1. We used `add_to_gallery` to save a file, and stored the `file.path` locally (in a db, shared preferences etc.)
+// 2. The user then updated their app
+// 3. They re-opened the app, and we want to access the file again:
+import 'package:path_provider/path_provider.dart';
+final fileName = basename(filePath);
+storageDirectory = await getApplicationDocumentsDirectory();
+final sourcePath = '${storageDirectory.path}/$fileName'; // This is the new path
+```

@@ -1,3 +1,9 @@
+## 0.5.0+1
+
+- Updated README.md to:
+  - Show the `keepFilename` parameter
+  - Cover an important note about iOS file paths
+
 ## 0.5.0
 
 - Added Android namespace to avoid conflicts with other packages
