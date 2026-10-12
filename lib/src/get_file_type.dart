@@ -7,7 +7,7 @@ const List<String> _videoFormats = [
   '.wmv',
   '.3gp',
   '.mkv',
-  '.flv'
+  '.flv',
 ];
 
 const List<String> _imageFormats = [
@@ -17,7 +17,7 @@ const List<String> _imageFormats = [
   '.gif',
   '.webp',
   '.tif',
-  '.heic'
+  '.heic',
 ];
 
 /// Returns 'video' or 'image' based on the file extension

@@ -11,11 +11,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final String _albumName = 'Add to Gallery';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
@@ -47,9 +49,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class LastGalleryImage extends StatelessWidget {
-  const LastGalleryImage({
-    Key? key,
-  }) : super(key: key);
+  const LastGalleryImage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +62,7 @@ class LastGalleryImage extends StatelessWidget {
             'When you restart the app, the last saved item will render here',
           );
         } else {
-          return Image.file(
-            File(galleryPath),
-            height: 100,
-          );
+          return Image.file(File(galleryPath), height: 100);
         }
       },
     );
@@ -75,10 +72,7 @@ class LastGalleryImage extends StatelessWidget {
 class SaveAsset extends StatelessWidget {
   final String assetPath;
 
-  const SaveAsset({
-    Key? key,
-    required this.assetPath,
-  }) : super(key: key);
+  const SaveAsset({super.key, required this.assetPath});
 
   @override
   Widget build(BuildContext context) {
@@ -91,15 +85,19 @@ class SaveAsset extends StatelessWidget {
             await _grantPermissions();
             // Save
             File file = await AddToGallery.addToGallery(
-                originalFile: localFile,
-                albumName: _albumName,
-                deleteOriginalFile: true,
-                keepFilename: true);
+              originalFile: localFile,
+              albumName: _albumName,
+              deleteOriginalFile: true,
+              keepFilename: true,
+            );
             await _saveGalleryPath(file.path);
+            if (!context.mounted) return;
             await _showAlertMessage(context, file.path);
           } on PlatformException catch (e) {
+            if (!context.mounted) return;
             await _showError(context, 'Error: ${e.message}');
           } catch (e) {
+            if (!context.mounted) return;
             await _showError(context, 'Error: ${e.toString()}');
           }
         },
@@ -107,10 +105,7 @@ class SaveAsset extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: Column(
             children: <Widget>[
-              Image.asset(
-                assetPath,
-                height: 100,
-              ),
+              Image.asset(assetPath, height: 100),
               Text('Save Local Asset'),
             ],
           ),
@@ -121,9 +116,7 @@ class SaveAsset extends StatelessWidget {
 }
 
 class SaveImage extends StatelessWidget {
-  const SaveImage({
-    Key? key,
-  }) : super(key: key);
+  const SaveImage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -135,34 +128,36 @@ class SaveImage extends StatelessWidget {
             if (!await Permission.camera.request().isGranted) {
               throw ('Camera Permission Required');
             }
-            XFile? image =
-                await ImagePicker().pickImage(source: ImageSource.camera);
+            XFile? image = await ImagePicker().pickImage(
+              source: ImageSource.camera,
+            );
             if (image != null) {
               File originalFile = File(image.path);
               // Grant permission
               await _grantPermissions();
               // Save
               File file = await AddToGallery.addToGallery(
-                  originalFile: originalFile,
-                  albumName: _albumName,
-                  deleteOriginalFile: true,
-                  keepFilename: true);
+                originalFile: originalFile,
+                albumName: _albumName,
+                deleteOriginalFile: true,
+                keepFilename: true,
+              );
               await _saveGalleryPath(file.path);
+              if (!context.mounted) return;
               await _showAlertMessage(context, file.path);
             }
           } on PlatformException catch (e) {
+            if (!context.mounted) return;
             await _showError(context, 'Error: ${e.message}');
           } catch (e) {
+            if (!context.mounted) return;
             await _showError(context, 'Error: ${e.toString()}');
           }
         },
         child: Padding(
           padding: EdgeInsets.all(8.0),
           child: Column(
-            children: <Widget>[
-              Icon(Icons.camera_alt),
-              Text('Take Photo'),
-            ],
+            children: <Widget>[Icon(Icons.camera_alt), Text('Take Photo')],
           ),
         ),
       ),
@@ -170,19 +165,13 @@ class SaveImage extends StatelessWidget {
   }
 }
 
-Future<void> _showAlertMessage(
-  BuildContext context,
-  String path,
-) async {
+Future<void> _showAlertMessage(BuildContext context, String path) async {
   await showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('Saved to Gallery'),
-        content: Image.file(
-          File(path),
-          height: 200,
-        ),
+        content: Image.file(File(path), height: 200),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -194,10 +183,7 @@ Future<void> _showAlertMessage(
   );
 }
 
-Future<void> _showError(
-  BuildContext context,
-  String message,
-) async {
+Future<void> _showError(BuildContext context, String message) async {
   await showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -237,19 +223,11 @@ Future<void> _grantPermissions() async {
   }
 }
 
-Future<File> _copyAssetLocally(
-  String path,
-) async {
+Future<File> _copyAssetLocally(String path) async {
   ByteData byteData = await rootBundle.load(path);
-  File file = await _getBlankFileForAsset(
-    path: path,
-    prefix: 'assets',
-  );
+  File file = await _getBlankFileForAsset(path: path, prefix: 'assets');
   await file.writeAsBytes(
-    byteData.buffer.asUint8List(
-      byteData.offsetInBytes,
-      byteData.lengthInBytes,
-    ),
+    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
   );
   return file;
 }
@@ -265,9 +243,7 @@ Future<File> _getBlankFileForAsset({
   return File('${directory.path}/$fileName');
 }
 
-Future<void> _saveGalleryPath(
-  String path,
-) async {
+Future<void> _saveGalleryPath(String path) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setString('galleryPath', path);
 }
