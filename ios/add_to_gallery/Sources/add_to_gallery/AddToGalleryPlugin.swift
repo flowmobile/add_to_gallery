@@ -2,54 +2,69 @@ import Flutter
 import UIKit
 import Photos
 
-public class SwiftAddToGalleryPlugin: NSObject, FlutterPlugin {
+public class AddToGalleryPlugin: NSObject, FlutterPlugin {
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "add_to_gallery", binaryMessenger: registrar.messenger())
-        let instance = SwiftAddToGalleryPlugin()
+        let instance = AddToGalleryPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+
     public func handle(
         _ call: FlutterMethodCall,
         result: @escaping FlutterResult
     ) {
         if call.method == "addToGallery" {
-            self.addToAssetCollection(call, result)
+            // PHPhotoLibrary calls back on a background queue, results must be sent on the main thread
+            let mainThreadResult: FlutterResult = { value in
+                DispatchQueue.main.async {
+                    result(value)
+                }
+            }
+            self.addToAssetCollection(call, mainThreadResult)
         } else {
             result(FlutterMethodNotImplemented)
         }
     }
-    
+
     private func addToAssetCollection(
         _ call: FlutterMethodCall,
         _ result: @escaping FlutterResult
     ) {
-        let permissionStatus = PHPhotoLibrary.authorizationStatus()
-        if permissionStatus != .authorized {
+        guard hasPhotoLibraryPermission() else {
             result(FlutterError(code: "permissions", message: "Please grant PHPhotoLibrary permission", details: nil))
+            return
+        }
+        guard let args = call.arguments as? Dictionary<String, Any>,
+              let imagePath = args["path"] as? String,
+              let albumName = args["album"] as? String else {
+            result(FlutterError(code: "bad_args", message: "Expected path and album arguments", details: nil))
+            return
+        }
+        if let album = fetchAssetCollectionForAlbum(albumName) {
+            self.addFileToAssetCollection(imagePath, album, result)
         } else {
-            let args = call.arguments as? Dictionary<String, Any>
-            let imagePath = args!["path"] as! String
-            let albumName = args!["album"] as! String
-            if let album = fetchAssetCollectionForAlbum(albumName) {
-                self.addFileToAssetCollection(imagePath, album, result)
-            } else {
-                createAssetCollectionForAlbum(albumName: albumName) { (error) in
-                    guard error == nil else {
-                        result(FlutterError(code: "album_not_available", message: "Album Not Available", details: nil))
-                        return
-                    }
-                    if let album = self.fetchAssetCollectionForAlbum(albumName){
-                        self.addFileToAssetCollection(imagePath, album, result)
-                    } else {
-                        result(FlutterError(code: "could_not_create_album", message: "Could Not Create Album", details: nil))
-                    }
+            createAssetCollectionForAlbum(albumName: albumName) { (error) in
+                guard error == nil else {
+                    result(FlutterError(code: "album_not_available", message: "Album Not Available", details: nil))
+                    return
+                }
+                if let album = self.fetchAssetCollectionForAlbum(albumName){
+                    self.addFileToAssetCollection(imagePath, album, result)
+                } else {
+                    result(FlutterError(code: "could_not_create_album", message: "Could Not Create Album", details: nil))
                 }
             }
         }
     }
-    
+
+    private func hasPhotoLibraryPermission() -> Bool {
+        if #available(iOS 14, *) {
+            return PHPhotoLibrary.authorizationStatus(for: .readWrite) == .authorized
+        }
+        return PHPhotoLibrary.authorizationStatus() == .authorized
+    }
+
     private func addFileToAssetCollection(
         _ imagePath: String,
         _ album: PHAssetCollection?,
@@ -85,7 +100,7 @@ public class SwiftAddToGalleryPlugin: NSObject, FlutterPlugin {
         }
         return nil
     }
-    
+
     private func createAssetCollectionForAlbum(
         albumName: String,
         completion: @escaping (Error?) -> ()
