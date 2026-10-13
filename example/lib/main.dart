@@ -39,7 +39,9 @@ class _MyAppState extends State<MyApp> {
             ),
             SaveAsset(assetPath: 'assets/local-image-1.jpg'),
             SaveAsset(assetPath: 'assets/local-image-2.jpg'),
-            SaveImage(),
+            SaveAsset(assetPath: 'assets/local-video.mp4'),
+            SaveFromCamera(video: false),
+            SaveFromCamera(video: true),
             LastGalleryImage(),
           ],
         ),
@@ -62,7 +64,7 @@ class LastGalleryImage extends StatelessWidget {
             'When you restart the app, the last saved item will render here',
           );
         } else {
-          return Image.file(File(galleryPath), height: 100);
+          return _preview(galleryPath, 100);
         }
       },
     );
@@ -105,8 +107,12 @@ class SaveAsset extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: Column(
             children: <Widget>[
-              Image.asset(assetPath, height: 100),
-              Text('Save Local Asset'),
+              _isVideo(assetPath)
+                  ? Icon(Icons.videocam, size: 100)
+                  : Image.asset(assetPath, height: 100),
+              Text(
+                _isVideo(assetPath) ? 'Save Local Video' : 'Save Local Asset',
+              ),
             ],
           ),
         ),
@@ -115,8 +121,10 @@ class SaveAsset extends StatelessWidget {
   }
 }
 
-class SaveImage extends StatelessWidget {
-  const SaveImage({super.key});
+class SaveFromCamera extends StatelessWidget {
+  final bool video;
+
+  const SaveFromCamera({super.key, required this.video});
 
   @override
   Widget build(BuildContext context) {
@@ -128,11 +136,11 @@ class SaveImage extends StatelessWidget {
             if (!await Permission.camera.request().isGranted) {
               throw ('Camera Permission Required');
             }
-            XFile? image = await ImagePicker().pickImage(
-              source: ImageSource.camera,
-            );
-            if (image != null) {
-              File originalFile = File(image.path);
+            XFile? media = video
+                ? await ImagePicker().pickVideo(source: ImageSource.camera)
+                : await ImagePicker().pickImage(source: ImageSource.camera);
+            if (media != null) {
+              File originalFile = File(media.path);
               // Grant permission
               await _grantPermissions();
               // Save
@@ -157,12 +165,31 @@ class SaveImage extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(8.0),
           child: Column(
-            children: <Widget>[Icon(Icons.camera_alt), Text('Take Photo')],
+            children: video
+                ? <Widget>[Icon(Icons.videocam), Text('Record Video')]
+                : <Widget>[Icon(Icons.camera_alt), Text('Take Photo')],
           ),
         ),
       ),
     );
   }
+}
+
+bool _isVideo(String path) =>
+    ['.mp4', '.mov'].contains(extension(path).toLowerCase());
+
+/// Images show a thumbnail, videos show an icon and their path
+Widget _preview(String path, double height) {
+  if (!_isVideo(path)) {
+    return Image.file(File(path), height: height);
+  }
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      Icon(Icons.videocam, size: height / 2),
+      Text(path),
+    ],
+  );
 }
 
 Future<void> _showAlertMessage(BuildContext context, String path) async {
@@ -171,7 +198,7 @@ Future<void> _showAlertMessage(BuildContext context, String path) async {
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('Saved to Gallery'),
-        content: Image.file(File(path), height: 200),
+        content: _preview(path, 200),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -250,5 +277,12 @@ Future<void> _saveGalleryPath(String path) async {
 
 Future<String?> _getGalleryPath() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('galleryPath');
+  String? path = prefs.getString('galleryPath');
+  // iOS paths change between app updates, so rebuild them from the documents
+  // directory, see "An Important Note about iOS Filepaths" in the README
+  if (path != null && Platform.isIOS) {
+    Directory directory = await getApplicationDocumentsDirectory();
+    path = '${directory.path}/${basename(path)}';
+  }
+  return path;
 }

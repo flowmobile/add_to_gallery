@@ -22,5 +22,7 @@ void main() {
       ),
       findsNWidgets(2),
     );
+    expect(find.text('Save Local Video'), findsOneWidget);
+    expect(find.text('Record Video'), findsOneWidget);
   });
 }

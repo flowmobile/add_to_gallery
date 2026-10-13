@@ -8,9 +8,12 @@ import 'package:add_to_gallery/src/get_file_type.dart';
 class AddToGallery {
   static const MethodChannel _channel = MethodChannel('add_to_gallery');
 
-  /// Makes a COPY of the file and saves it to the gallery
+  /// Makes a COPY of the image or video and saves it to the gallery
   ///
   /// Returns the path of the new file in the gallery
+  ///
+  /// Throws an [ArgumentError] if the file extension isn't a supported image
+  /// or video format
   static Future<File> addToGallery({
     /// The original file to copy to the gallery
     required File originalFile,

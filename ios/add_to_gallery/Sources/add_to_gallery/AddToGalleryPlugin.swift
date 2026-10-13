@@ -36,13 +36,14 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
             return
         }
         guard let args = call.arguments as? Dictionary<String, Any>,
-              let imagePath = args["path"] as? String,
+              let filePath = args["path"] as? String,
               let albumName = args["album"] as? String else {
             result(FlutterError(code: "bad_args", message: "Expected path and album arguments", details: nil))
             return
         }
+        let isVideo = args["type"] as? String == "video"
         if let album = fetchAssetCollectionForAlbum(albumName) {
-            self.addFileToAssetCollection(imagePath, album, result)
+            self.addFileToAssetCollection(filePath, isVideo, album, result)
         } else {
             createAssetCollectionForAlbum(albumName: albumName) { (error) in
                 guard error == nil else {
@@ -50,7 +51,7 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
                     return
                 }
                 if let album = self.fetchAssetCollectionForAlbum(albumName){
-                    self.addFileToAssetCollection(imagePath, album, result)
+                    self.addFileToAssetCollection(filePath, isVideo, album, result)
                 } else {
                     result(FlutterError(code: "could_not_create_album", message: "Could Not Create Album", details: nil))
                 }
@@ -66,13 +67,16 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
     }
 
     private func addFileToAssetCollection(
-        _ imagePath: String,
+        _ filePath: String,
+        _ isVideo: Bool,
         _ album: PHAssetCollection?,
         _ result: @escaping FlutterResult
     ) {
-        let url = URL(fileURLWithPath: imagePath)
+        let url = URL(fileURLWithPath: filePath)
         PHPhotoLibrary.shared().performChanges({
-            let assetCreationRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+            let assetCreationRequest = isVideo
+                ? PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+                : PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
             if (album != nil) {
                 guard let assetCollectionChangeRequest = PHAssetCollectionChangeRequest(for: album!),
                     let createdAssetPlaceholder = assetCreationRequest?.placeholderForCreatedAsset else {
@@ -82,9 +86,9 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
             }
         }) { (success, error) in
             if success {
-                result(imagePath) // Success!
+                result(filePath) // Success!
             } else {
-                result(FlutterError(code: "could_not_save_file", message: "Could Not Save File", details: nil))
+                result(FlutterError(code: "could_not_save_file", message: "Could Not Save File", details: error?.localizedDescription))
             }
         }
     }

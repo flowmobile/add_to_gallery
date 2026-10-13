@@ -33,3 +33,4 @@ flutter:
   assets:
     - assets/local-image-1.jpg
     - assets/local-image-2.jpg
+    - assets/local-video.mp4
