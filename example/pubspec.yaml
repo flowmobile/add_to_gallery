@@ -3,29 +3,34 @@ description: Demonstrates how to use the add_to_gallery plugin
 publish_to: 'none'
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
-  flutter: ^2.0.4
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
 
 dependencies:
   add_to_gallery:
     path: ../
-  device_info_plus: ^11.1.1
+  # 12.4.0+ needs Xcode 26 to build for iOS
+  device_info_plus: 12.3.0
   image_picker: ^1.1.2
   path_provider: ^2.1.5
   path: ^1.9.0
-  permission_handler: ^11.3.1
+  permission_handler: ^12.0.1
   shared_preferences: ^2.3.3
 
   flutter:
     sdk: flutter
 
 dev_dependencies:
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
 
 flutter:
+  config:
+    enable-swift-package-manager: true
   uses-material-design: true
 
   assets:
     - assets/local-image-1.jpg
     - assets/local-image-2.jpg
+    - assets/local-video.mp4

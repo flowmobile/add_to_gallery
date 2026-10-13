@@ -1,9 +1,2 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="flowmobile.add_to_gallery">
-
-    <application>
-        <activity android:name=".AddToGallery"></activity>
-    </application>
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 </manifest>

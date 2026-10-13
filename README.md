@@ -8,11 +8,19 @@ Adds images and videos to the Android Gallery and iOS Photos
 
 View example app
 
-💡 There are a couple of important notes about **Google photos** and **iOS filepaths**. Jump to the end of this page for info!
+💡 There are a few important notes about **Google photos**, **iOS filepaths** and **checking for duplicates**. Jump to the end of this page for info!
 
 ## Installation
 
 Add `add_to_gallery` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
+
+## Requirements
+
+- Flutter 3.44 or later (Dart 3.12)
+- iOS 13 or later, with [Swift Package Manager](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers) or CocoaPods
+- Android 7.0 (API 24) or later
+
+Using an older version of Flutter? Stay on `add_to_gallery: ^0.5.0`.
 
 ## Permissions
 
@@ -21,13 +29,20 @@ You need the following permissions in your app:
 - **iOS**
   - `NSPhotoLibraryUsageDescription`
   - This allows the plugin to use the [PHPhotoLibrary](https://developer.apple.com/documentation/photokit/phphotolibrary/) APIs to add assets to the user's photo library.
+  - Limited access works too: the plugin can still create the album and add new photos and videos. iOS may show its own limited-access prompt; add `PHPhotoLibraryPreventAutomaticLimitedAccessAlert` to your `Info.plist` to stop it.
 - **Android**
-  - `READ_EXTERNAL_STORAGE`
-  - `WRITE_EXTERNAL_STORAGE`
-  - If you target Android 10, you will also need the [requestLegacyExternalStorage="true"](https://developer.android.com/training/data-storage/use-cases#opt-out-in-production-app) in your AndroidManifest.
-  - NB: Android < 13 needs `storge` permission
-  - NB: Android >= 13 needs `photos` permission
-    - ^ the example app shows how to request these permissions
+  - Android 9 and below need `WRITE_EXTERNAL_STORAGE`, requested at runtime, to save to the gallery
+  - Android 10 and above don't need a permission to save to the gallery
+  - Android 10 doesn't allow reading shared storage by file path. To read the returned `File` (for example with `Image.file`), you also need `READ_EXTERNAL_STORAGE` and [requestLegacyExternalStorage="true"](https://developer.android.com/training/data-storage/use-cases#opt-out-in-production-app)
+  - Android 11 and above can read the files your app saved without a permission
+  - ^ the example app shows how to request these permissions:
+
+```xml
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
+<application android:requestLegacyExternalStorage="true" ...>
+```
 
 This plugin **does not** manage permissions for you. _By excluding permissions from our plugin we have created a simple, reliable plugin._
 
@@ -37,6 +52,8 @@ We recommend using [permission_handler](https://pub.dev/packages/permission_hand
 
 There's only one method. It copies the source file to the gallery and returns the new file.
 
+It recognises images (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.tif`, `.heic`) and videos (`.mp4`, `.mov`, `.avi`, `.wmv`, `.3gp`, `.mkv`, `.flv`) by their extension, and throws an `ArgumentError` for other files. The gallery must also support the file's format: for example, iOS Photos doesn't import `.wmv`, `.mkv` or `.flv` videos, so saving them fails. On Android, images are saved to `Pictures/<albumName>` and videos to `Movies/<albumName>`.
+
 ```dart
 File file = await AddToGallery.addToGallery(
   originalFile: File('/Some/Media/Path.jpg'),
@@ -44,7 +61,7 @@ File file = await AddToGallery.addToGallery(
   deleteOriginalFile: false,
   keepFilename: true,
 );
-print("Savd to gallery with Path: ${file.path}");
+print("Saved to gallery with Path: ${file.path}");
 ```
 
 Using [permission_handler](https://pub.dev/packages/permission_handler), this may look like:
@@ -59,7 +76,7 @@ Future<void> _addToGalleryExample() async {
       deleteOriginalFile: true,
       keepFilename: true,
     );
-    print("Savd to gallery with Path: ${file.path}");
+    print("Saved to gallery with Path: ${file.path}");
   } catch(e) {
     print("Error: $e");
   }
@@ -71,17 +88,18 @@ Future<void> _grantPermissions() async {
       : null;
   // We need storage on:
   // - iOS to pick files from other apps
-  // - Android < 13 for legacy access
-  if (Platform.isIOS || (androidVersion != null && androidVersion <= 32)) {
+  // - Android 9 and below to write to the gallery
+  // - Android 10 to read the saved file (with requestLegacyExternalStorage)
+  if (Platform.isIOS || (androidVersion != null && androidVersion <= 29)) {
     if (!await Permission.storage.request().isGranted) {
       throw ('Storage Permission Required');
     }
   }
-  // We need photos on:
-  // - iOS to pick files from this app
-  // - Android >= 13
-  if (Platform.isIOS || (androidVersion != null && androidVersion >= 33)) {
-    if (!await Permission.photos.request().isGranted) {
+  // We need photos on iOS to add to the photo library
+  // Android 10 and above can add to the gallery without a permission
+  if (Platform.isIOS) {
+    PermissionStatus status = await Permission.photos.request();
+    if (!status.isGranted && !status.isLimited) {
       throw ('Photos Permission Required');
     }
   }
@@ -93,10 +111,11 @@ Future<void> _grantPermissions() async {
 The [example app](/example) shows a few more edge-cases in action.
 
 - Uses [permission_handler](https://pub.dev/packages/permission_handler) to request permissions
-- Uses [image_picker](https://pub.dev/packages/image_picker) to take photos with the camera
-- Copies assets to the gallery
+- Uses [image_picker](https://pub.dev/packages/image_picker) to take photos and record videos with the camera
+- Copies image and video assets to the gallery
 - Uses [shared_preferences](https://pub.dev/packages/shared_preferences) to save and read the file path locally
   - _This shows that the assets are still accessible between reboots_
+  - _On iOS it rebuilds the path from the documents directory, see the note about iOS Filepaths below_
 
 ## Credits & Comparison
 
@@ -210,3 +229,12 @@ final fileName = basename(filePath);
 storageDirectory = await getApplicationDocumentsDirectory();
 final sourcePath = '${storageDirectory.path}/$fileName'; // This is the new path
 ```
+
+## 💡 Checking whether a file is already in the gallery
+
+This plugin only adds files to the gallery, it doesn't search it. To avoid saving duplicates, store the path that `addToGallery` returns (as the example app does) and check it before saving again:
+
+- On Android, the path points at the file in the gallery
+- On iOS, Photos doesn't expose file paths, so the path points at your app's copy in the documents directory (see the note above)
+
+To search the photo library itself, use a package such as [photo_manager](https://pub.dev/packages/photo_manager).

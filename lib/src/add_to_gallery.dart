@@ -8,29 +8,33 @@ import 'package:add_to_gallery/src/get_file_type.dart';
 class AddToGallery {
   static const MethodChannel _channel = MethodChannel('add_to_gallery');
 
-  /// Makes a COPY of the file and saves it to the gallery
+  /// Makes a COPY of the image or video and saves it to the gallery
   ///
   /// Returns the path of the new file in the gallery
-  static Future<File> addToGallery(
-      {
-      /// The original file to copy to the gallery
-      required File originalFile,
+  ///
+  /// Throws an [ArgumentError] if the file extension isn't a supported image
+  /// or video format
+  static Future<File> addToGallery({
+    /// The original file to copy to the gallery
+    required File originalFile,
 
-      /// Name of the album to save to, the album is created if necessary
-      required String albumName,
+    /// Name of the album to save to, the album is created if necessary
+    required String albumName,
 
-      /// Should we delete the original file after saving?
-      required bool deleteOriginalFile,
+    /// Should we delete the original file after saving?
+    required bool deleteOriginalFile,
 
-      /// Should we keep the same file name of the file
-      required bool keepFilename}) async {
+    /// Should we keep the same file name of the file
+    required bool keepFilename,
+  }) async {
     // Is it an image or video?
     String filetype = getFileType(originalFile.path);
     // Copy the original file (which may be temporary) to a permenant directory
     File copiedFile = await copyToPermanentDirectory(
-        originalFile: originalFile,
-        prefix: filetype,
-        keepFilename: keepFilename);
+      originalFile: originalFile,
+      prefix: filetype,
+      keepFilename: keepFilename,
+    );
 
     // Save to gallery
     String? methodResults = await _channel.invokeMethod(
@@ -41,18 +45,15 @@ class AddToGallery {
         'album': albumName,
       },
     );
-    // Nothing? Probably Android, return the copied file
-    if (methodResults == null) {
-      return copiedFile;
-    }
-    File galleryFile = File(methodResults.toString());
+    // Nothing? The platform didn't report a path, so keep our copy
+    File galleryFile = methodResults == null ? copiedFile : File(methodResults);
     // If the operation created a NEW file, delete our copy
     if (galleryFile.path != copiedFile.path) {
-      copiedFile.delete();
+      await copiedFile.delete();
     }
     // Delete the original file?
     if (deleteOriginalFile) {
-      originalFile.delete();
+      await originalFile.delete();
     }
     // Return the new file
     return galleryFile;
