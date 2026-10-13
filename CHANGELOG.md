@@ -11,6 +11,8 @@
 - iOS sends results on the main thread and returns an error instead of crashing on bad arguments
 - Android errors now have a code and message (`could_not_save_file`, `file_not_found`, `bad_args`) instead of a bare `error`
 - `deleteOriginalFile` is honoured even when the platform doesn't return a path
+- Reports an error, instead of success, when the gallery doesn't create the asset
+- Documents which Android versions need which permissions: Android 10 and above don't need a permission to save
 
 ## 0.5.0+1
 

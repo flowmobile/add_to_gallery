@@ -30,11 +30,18 @@ You need the following permissions in your app:
   - `NSPhotoLibraryUsageDescription`
   - This allows the plugin to use the [PHPhotoLibrary](https://developer.apple.com/documentation/photokit/phphotolibrary/) APIs to add assets to the user's photo library.
 - **Android**
-  - `READ_EXTERNAL_STORAGE`
-  - `WRITE_EXTERNAL_STORAGE`
-  - NB: Android < 13 needs `storage` permission
-  - NB: Android >= 13 needs `photos` permission
-    - ^ the example app shows how to request these permissions
+  - Android 9 and below need `WRITE_EXTERNAL_STORAGE`, requested at runtime, to save to the gallery
+  - Android 10 and above don't need a permission to save to the gallery
+  - Android 10 doesn't allow reading shared storage by file path. To read the returned `File` (for example with `Image.file`), you also need `READ_EXTERNAL_STORAGE` and [requestLegacyExternalStorage="true"](https://developer.android.com/training/data-storage/use-cases#opt-out-in-production-app)
+  - Android 11 and above can read the files your app saved without a permission
+  - ^ the example app shows how to request these permissions:
+
+```xml
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
+<application android:requestLegacyExternalStorage="true" ...>
+```
 
 This plugin **does not** manage permissions for you. _By excluding permissions from our plugin we have created a simple, reliable plugin._
 
@@ -80,16 +87,16 @@ Future<void> _grantPermissions() async {
       : null;
   // We need storage on:
   // - iOS to pick files from other apps
-  // - Android < 13 for legacy access
-  if (Platform.isIOS || (androidVersion != null && androidVersion <= 32)) {
+  // - Android 9 and below to write to the gallery
+  // - Android 10 to read the saved file (with requestLegacyExternalStorage)
+  if (Platform.isIOS || (androidVersion != null && androidVersion <= 29)) {
     if (!await Permission.storage.request().isGranted) {
       throw ('Storage Permission Required');
     }
   }
-  // We need photos on:
-  // - iOS to pick files from this app
-  // - Android >= 13
-  if (Platform.isIOS || (androidVersion != null && androidVersion >= 33)) {
+  // We need photos on iOS to add to the photo library
+  // Android 10 and above can add to the gallery without a permission
+  if (Platform.isIOS) {
     if (!await Permission.photos.request().isGranted) {
       throw ('Photos Permission Required');
     }

@@ -234,16 +234,16 @@ Future<void> _grantPermissions() async {
       : null;
   // We need storage on:
   // - iOS to pick files from other apps
-  // - Android < 13 for legacy access
-  if (Platform.isIOS || (androidVersion != null && androidVersion <= 32)) {
+  // - Android 9 and below to write to the gallery
+  // - Android 10 to read the saved file (with requestLegacyExternalStorage)
+  if (Platform.isIOS || (androidVersion != null && androidVersion <= 29)) {
     if (!await Permission.storage.request().isGranted) {
       throw ('Storage Permission Required');
     }
   }
-  // We need photos on:
-  // - iOS to pick files from this app
-  // - Android >= 13
-  if (Platform.isIOS || (androidVersion != null && androidVersion >= 33)) {
+  // We need photos on iOS to add to the photo library
+  // Android 10 and above can add to the gallery without a permission
+  if (Platform.isIOS) {
     if (!await Permission.photos.request().isGranted) {
       throw ('Photos Permission Required');
     }
