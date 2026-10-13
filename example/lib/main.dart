@@ -244,7 +244,8 @@ Future<void> _grantPermissions() async {
   // We need photos on iOS to add to the photo library
   // Android 10 and above can add to the gallery without a permission
   if (Platform.isIOS) {
-    if (!await Permission.photos.request().isGranted) {
+    PermissionStatus status = await Permission.photos.request();
+    if (!status.isGranted && !status.isLimited) {
       throw ('Photos Permission Required');
     }
   }

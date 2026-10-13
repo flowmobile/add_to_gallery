@@ -29,6 +29,7 @@ You need the following permissions in your app:
 - **iOS**
   - `NSPhotoLibraryUsageDescription`
   - This allows the plugin to use the [PHPhotoLibrary](https://developer.apple.com/documentation/photokit/phphotolibrary/) APIs to add assets to the user's photo library.
+  - Limited access works too: the plugin can still create the album and add new photos and videos. iOS may show its own limited-access prompt; add `PHPhotoLibraryPreventAutomaticLimitedAccessAlert` to your `Info.plist` to stop it.
 - **Android**
   - Android 9 and below need `WRITE_EXTERNAL_STORAGE`, requested at runtime, to save to the gallery
   - Android 10 and above don't need a permission to save to the gallery
@@ -51,7 +52,7 @@ We recommend using [permission_handler](https://pub.dev/packages/permission_hand
 
 There's only one method. It copies the source file to the gallery and returns the new file.
 
-It works with images (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.tif`, `.heic`) and videos (`.mp4`, `.mov`, `.avi`, `.wmv`, `.3gp`, `.mkv`, `.flv`). Other files throw an `ArgumentError`. On Android, images are saved to `Pictures/<albumName>` and videos to `Movies/<albumName>`.
+It recognises images (`.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.tif`, `.heic`) and videos (`.mp4`, `.mov`, `.avi`, `.wmv`, `.3gp`, `.mkv`, `.flv`) by their extension, and throws an `ArgumentError` for other files. The gallery must also support the file's format: for example, iOS Photos doesn't import `.wmv`, `.mkv` or `.flv` videos, so saving them fails. On Android, images are saved to `Pictures/<albumName>` and videos to `Movies/<albumName>`.
 
 ```dart
 File file = await AddToGallery.addToGallery(
@@ -97,7 +98,8 @@ Future<void> _grantPermissions() async {
   // We need photos on iOS to add to the photo library
   // Android 10 and above can add to the gallery without a permission
   if (Platform.isIOS) {
-    if (!await Permission.photos.request().isGranted) {
+    PermissionStatus status = await Permission.photos.request();
+    if (!status.isGranted && !status.isLimited) {
       throw ('Photos Permission Required');
     }
   }

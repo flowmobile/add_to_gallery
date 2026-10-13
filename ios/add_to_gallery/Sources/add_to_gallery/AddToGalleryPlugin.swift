@@ -61,7 +61,9 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
 
     private func hasPhotoLibraryPermission() -> Bool {
         if #available(iOS 14, *) {
-            return PHPhotoLibrary.authorizationStatus(for: .readWrite) == .authorized
+            // Limited access can still add new assets to the library
+            let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+            return status == .authorized || status == .limited
         }
         return PHPhotoLibrary.authorizationStatus() == .authorized
     }

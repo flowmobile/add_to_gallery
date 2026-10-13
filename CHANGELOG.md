@@ -12,6 +12,8 @@
 - Android errors now have a code and message (`could_not_save_file`, `file_not_found`, `bad_args`) instead of a bare `error`
 - `deleteOriginalFile` is honoured even when the platform doesn't return a path
 - Reports an error, instead of success, when the gallery doesn't create the asset
+- Android saves on a background thread, so large videos don't block the UI
+- iOS accepts limited Photos access, which can still create albums and add new assets
 - Documents which Android versions need which permissions: Android 10 and above don't need a permission to save
 
 ## 0.5.0+1
