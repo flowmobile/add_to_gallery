@@ -5,6 +5,8 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import androidx.annotation.RequiresApi
@@ -15,20 +17,27 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler {
 
     private lateinit var context: Context
     private lateinit var channel: MethodChannel
+    // Copying large videos would block the main thread, so saves run here one at a time
+    private lateinit var executor: ExecutorService
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         context = binding.applicationContext
         channel = MethodChannel(binding.binaryMessenger, "add_to_gallery")
         channel.setMethodCallHandler(this)
+        executor = Executors.newSingleThreadExecutor()
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        executor.shutdown()
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -48,16 +57,18 @@ class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler {
             result.error("file_not_found", "File not found at path: $path", null)
             return
         }
-        try {
-            val galleryPath = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                addToGalleryLegacy(source, album, isVideo)
-            } else {
-                addToGalleryScoped(source, album, isVideo)
+        executor.execute {
+            try {
+                val galleryPath = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    addToGalleryLegacy(source, album, isVideo)
+                } else {
+                    addToGalleryScoped(source, album, isVideo)
+                }
+                mainHandler.post { result.success(galleryPath) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                mainHandler.post { result.error("could_not_save_file", e.message, e.toString()) }
             }
-            result.success(galleryPath)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            result.error("could_not_save_file", e.message, e.toString())
         }
     }
 
