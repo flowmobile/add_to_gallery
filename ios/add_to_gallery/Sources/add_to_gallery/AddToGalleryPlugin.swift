@@ -73,10 +73,13 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
         _ result: @escaping FlutterResult
     ) {
         let url = URL(fileURLWithPath: filePath)
+        // The creation requests return nil for unreadable files, which still counts as a successful change
+        var assetCreated = false
         PHPhotoLibrary.shared().performChanges({
             let assetCreationRequest = isVideo
                 ? PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
                 : PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+            assetCreated = assetCreationRequest != nil
             if (album != nil) {
                 guard let assetCollectionChangeRequest = PHAssetCollectionChangeRequest(for: album!),
                     let createdAssetPlaceholder = assetCreationRequest?.placeholderForCreatedAsset else {
@@ -85,7 +88,7 @@ public class AddToGalleryPlugin: NSObject, FlutterPlugin {
                 assetCollectionChangeRequest.addAssets(NSArray(array: [createdAssetPlaceholder]))
             }
         }) { (success, error) in
-            if success {
+            if success && assetCreated {
                 result(filePath) // Success!
             } else {
                 result(FlutterError(code: "could_not_save_file", message: "Could Not Save File", details: error?.localizedDescription))

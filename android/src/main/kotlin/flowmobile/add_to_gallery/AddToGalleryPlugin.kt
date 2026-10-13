@@ -84,7 +84,11 @@ class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler {
         }
         mimeTypeOf(file)?.let { values.put(MediaStore.MediaColumns.MIME_TYPE, it) }
         values.put(MediaStore.MediaColumns.DATA, file.path)
-        context.contentResolver.insert(collection, values)
+        if (context.contentResolver.insert(collection, values) == null) {
+            // The gallery won't show the copy without a MediaStore entry
+            file.delete()
+            throw IOException("Could not add ${file.name} to the MediaStore")
+        }
         return file.path
     }
 
@@ -117,7 +121,9 @@ class AddToGalleryPlugin : FlutterPlugin, MethodCallHandler {
             }
             values.clear()
             values.put(MediaStore.MediaColumns.IS_PENDING, 0)
-            resolver.update(item, values, null, null)
+            if (resolver.update(item, values, null, null) == 0) {
+                throw IOException("Could not publish $item to the gallery")
+            }
         } catch (e: Exception) {
             // Don't leave an empty, pending item in the gallery
             resolver.delete(item, null, null)
